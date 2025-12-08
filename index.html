@@ -1129,7 +1129,7 @@
                     const decelerationFactor = 1 - (landingPct * 0.7); 
                     progress += (1 * flightSpeedMultiplier * decelerationFactor);
                     pct = Math.min(progress / totalSteps, 1);
-                    }
+
                 } else if (pct >= 1) { endFlight(); return; }
 
                 const prevLat = curLat; const prevLon = curLon;
@@ -1294,4 +1294,3 @@
     </script>
 </body>
 </html>
-
