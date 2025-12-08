@@ -678,6 +678,7 @@
             currentLang = currentLang === 'it' ? 'en' : 'it';
             document.getElementById('lang-text').innerText = currentLang.toUpperCase();
             updateInterfaceText();
+            updateAirportNames(); // NEW: Update airport names when language changes
         }
 
         function updateInterfaceText() {
@@ -712,6 +713,48 @@
             mapBtn.querySelector('span').innerText = currentMapMode === 'sat' ? t.map_view : t.sat_view;
         }
 
+        // NEW: Function to handle airport name changes dynamically
+        function updateAirportNames() {
+            const depSelect = document.getElementById('departure');
+            const arrSelect = document.getElementById('arrival');
+            const selectedDep = depSelect.value;
+            const selectedArr = arrSelect.value;
+            
+            // Clear existing options
+            depSelect.innerHTML = '';
+            arrSelect.innerHTML = '';
+            
+            // Sort airports based on current language name
+            airports.sort((a, b) => {
+                const nameA = currentLang === 'it' ? a.name : a.name_en;
+                const nameB = currentLang === 'it' ? b.name : b.name_en;
+                return nameA.localeCompare(nameB);
+            });
+            
+            // Repopulate selects
+            airports.forEach(ap => {
+                const name = currentLang === 'it' ? ap.name : ap.name_en;
+                const label = `${name} (${ap.id})`;
+                depSelect.add(new Option(label, ap.id));
+                arrSelect.add(new Option(label, ap.id));
+            });
+            
+            // Restore selection
+            depSelect.value = selectedDep;
+            arrSelect.value = selectedArr;
+            
+            // Update map markers tooltips
+             map.eachLayer(layer => {
+                if (layer.airportId) {
+                     const ap = airports.find(a => a.id === layer.airportId);
+                     if(ap) {
+                         const name = currentLang === 'it' ? ap.name : ap.name_en;
+                         layer.setTooltipContent(name);
+                     }
+                }
+            });
+        }
+
         window.onload = function() {
             setTimeout(() => { document.getElementById('main-menu').classList.add('visible'); }, 100);
             
@@ -732,7 +775,6 @@
                 if(!isDragging) return;
                 currentY = e.touches[0].clientY;
                 const diff = currentY - startY;
-                // Simple visual feedback could go here if needed
             }, {passive: true});
 
             handle.addEventListener('touchend', (e) => {
@@ -740,24 +782,20 @@
                 isDragging = false;
                 const diff = currentY - startY;
                 
-                // If swipe down > 30px, minimize
                 if (diff > 30) {
                     sidebar.classList.add('minimized');
                     centerControls.classList.add('minimized');
                 }
-                // If swipe up < -30px (dragged up), maximize
                 else if (diff < -30) {
                     sidebar.classList.remove('minimized');
                     centerControls.classList.remove('minimized');
                 }
-                // Also toggle on click (small movement)
                 else if (Math.abs(diff) < 5) {
                     sidebar.classList.toggle('minimized');
                     centerControls.classList.toggle('minimized');
                 }
             });
             
-            // Allow clicking header too to toggle
             document.querySelector('.sidebar .header').addEventListener('click', () => {
                 if(window.innerWidth <= 768) {
                     sidebar.classList.toggle('minimized');
@@ -773,101 +811,163 @@
         }
         function toggleNewsModal() { document.getElementById('news-modal').classList.toggle('open'); }
 
+        // --- UPDATED AIRPORTS ARRAY WITH ENGLISH NAMES ---
         const airports = [
-            // ORIGINALI
-            { id: 'FCO', name: 'Roma Fiumicino', lat: 41.8003, lon: 12.2462 }, { id: 'CIA', name: 'Roma Ciampino', lat: 41.7994, lon: 12.5926 },
-            { id: 'MXP', name: 'Milano Malpensa', lat: 45.6289, lon: 8.7251 }, { id: 'LIN', name: 'Milano Linate', lat: 45.4613, lon: 9.2795 },
-            { id: 'BGY', name: 'Milano Bergamo', lat: 45.6701, lon: 9.7042 }, { id: 'VCE', name: 'Venezia Marco Polo', lat: 45.5053, lon: 12.3519 },
-            { id: 'NAP', name: 'Napoli Capodichino', lat: 40.8844, lon: 14.2908 }, { id: 'CTA', name: 'Catania Fontanarossa', lat: 37.4668, lon: 15.0664 },
-            { id: 'PMO', name: 'Palermo Punta Raisi', lat: 38.1760, lon: 13.0911 }, { id: 'BLQ', name: 'Bologna Guglielmo Marconi', lat: 44.5354, lon: 11.2887 },
-            { id: 'TRN', name: 'Torino Caselle', lat: 45.2008, lon: 7.6496 }, { id: 'CAG', name: 'Cagliari Elmas', lat: 39.2515, lon: 9.0543 },
-            { id: 'BRI', name: 'Bari Karol Wojtyła', lat: 41.1389, lon: 16.7606 }, { id: 'VRN', name: 'Verona Villafranca', lat: 45.3957, lon: 10.8885 },
-            { id: 'LHR', name: 'Londra Heathrow', lat: 51.4700, lon: -0.4543 }, { id: 'LGW', name: 'Londra Gatwick', lat: 51.1537, lon: -0.1821 },
-            { id: 'CDG', name: 'Parigi CDG', lat: 49.0097, lon: 2.5479 }, { id: 'ORY', name: 'Parigi Orly', lat: 48.7233, lon: 2.3794 },
-            { id: 'FRA', name: 'Francoforte', lat: 50.0379, lon: 8.5622 }, { id: 'MUC', name: 'Monaco', lat: 48.3537, lon: 11.7750 },
-            { id: 'BER', name: 'Berlino Brandeburgo', lat: 52.3667, lon: 13.5033 }, { id: 'AMS', name: 'Amsterdam', lat: 52.3086, lon: 4.7639 },
-            { id: 'MAD', name: 'Madrid', lat: 40.4839, lon: -3.5679 }, { id: 'BCN', name: 'Barcellona El Prat', lat: 41.2974, lon: 2.0833 },
-            { id: 'ZRH', name: 'Zurigo', lat: 47.4582, lon: 8.5555 }, { id: 'GVA', name: 'Ginevra', lat: 46.2370, lon: 6.1092 },
-            { id: 'VIE', name: 'Vienna', lat: 48.1103, lon: 16.5697 }, { id: 'BRU', name: 'Bruxelles', lat: 50.9014, lon: 4.4844 },
-            { id: 'ATH', name: 'Atene', lat: 37.9364, lon: 23.9445 }, { id: 'IST', name: 'Istanbul', lat: 41.2753, lon: 28.7519 },
-            { id: 'DUB', name: 'Dublino', lat: 53.4264, lon: -6.2499 }, { id: 'LIS', name: 'Lisbona', lat: 38.7742, lon: -9.1342 },
-            { id: 'OSL', name: 'Oslo', lat: 60.1976, lon: 11.1004 }, { id: 'ARN', name: 'Stoccolma', lat: 59.6498, lon: 17.9238 },
-            { id: 'CPH', name: 'Copenhagen', lat: 55.6180, lon: 12.6508 }, { id: 'HEL', name: 'Helsinki', lat: 60.3172, lon: 24.9633 },
-            { id: 'WAW', name: 'Varsavia', lat: 52.1672, lon: 20.9679 }, { id: 'KEF', name: 'Reykjavik', lat: 63.9850, lon: -22.6056 },
-            { id: 'SVO', name: 'Mosca Sheremetyevo', lat: 55.9726, lon: 37.4146 }, { id: 'PRG', name: 'Praga', lat: 50.1008, lon: 14.2600 },
-            { id: 'BUD', name: 'Budapest', lat: 47.4369, lon: 19.2556 }, { id: 'NCE', name: 'Nizza', lat: 43.6617, lon: 7.2167 },
-            { id: 'MLA', name: 'Malta', lat: 35.8575, lon: 14.4775 }, { id: 'EDI', name: 'Edimburgo', lat: 55.9508, lon: -3.3615 },
-            { id: 'JFK', name: 'New York JFK', lat: 40.6413, lon: -73.7781 }, { id: 'EWR', name: 'Newark Liberty', lat: 40.6895, lon: -74.1745 },
-            { id: 'LAX', name: 'Los Angeles', lat: 33.9416, lon: -118.4085 }, { id: 'SFO', name: 'San Francisco', lat: 37.6213, lon: -122.3790 },
-            { id: 'ORD', name: 'Chicago O\'Hare', lat: 41.9742, lon: -87.9073 }, { id: 'ATL', name: 'Atlanta Hartsfield-Jackson', lat: 33.6407, lon: -84.4277 },
-            { id: 'DFW', name: 'Dallas/Fort Worth', lat: 32.8998, lon: -97.0403 }, { id: 'DEN', name: 'Denver', lat: 39.8561, lon: -104.6737 },
-            { id: 'MIA', name: 'Miami', lat: 25.7959, lon: -80.2870 }, { id: 'MCO', name: 'Orlando', lat: 28.4312, lon: -81.3081 },
-            { id: 'SEA', name: 'Seattle Tacoma', lat: 47.4502, lon: -122.3116 }, { id: 'BOS', name: 'Boston Logan', lat: 42.3656, lon: -71.0096 },
-            { id: 'LAS', name: 'Las Vegas', lat: 36.0840, lon: -115.1537 }, { id: 'YYZ', name: 'Toronto Pearson', lat: 43.6777, lon: -79.6248 },
-            { id: 'YVR', name: 'Vancouver', lat: 49.1947, lon: -123.1763 }, { id: 'YUL', name: 'Montréal Trudeau', lat: 45.4657, lon: -73.7455 },
-            { id: 'HNL', name: 'Honolulu', lat: 21.3187, lon: -157.9225 }, { id: 'MEX', name: 'Città del Messico', lat: 19.4361, lon: -99.0719 },
-            { id: 'IAD', name: 'Washington Dulles', lat: 38.9445, lon: -77.4558 }, { id: 'PHX', name: 'Phoenix Sky Harbor', lat: 33.4352, lon: -112.0101 },
-            { id: 'ANC', name: 'Anchorage', lat: 61.1743, lon: -149.9962 }, { id: 'GRU', name: 'San Paolo Guarulhos', lat: -23.4356, lon: -46.4731 },
-            { id: 'GIG', name: 'Rio de Janeiro Galeão', lat: -22.8089, lon: -43.2436 }, { id: 'EZE', name: 'Buenos Aires Ezeiza', lat: -34.8150, lon: -58.5348 },
-            { id: 'SCL', name: 'Santiago del Cile', lat: -33.3930, lon: -70.7858 }, { id: 'BOG', name: 'Bogotà El Dorado', lat: 4.7016, lon: -74.1469 },
-            { id: 'LIM', name: 'Lima Jorge Chávez', lat: -12.0240, lon: -77.1143 }, { id: 'PTY', name: 'Panama City Tocumen', lat: 9.0714, lon: -79.3835 },
-            { id: 'CUN', name: 'Cancún', lat: 21.0365, lon: -86.8771 }, { id: 'SJO', name: 'San José (Costa Rica)', lat: 9.9939, lon: -84.2088 },
-            { id: 'UIO', name: 'Quito', lat: -0.1292, lon: -78.3575 }, { id: 'MVD', name: 'Montevideo', lat: -34.8384, lon: -56.0308 },
-            { id: 'HND', name: 'Tokyo Haneda', lat: 35.5494, lon: 139.7798 }, { id: 'NRT', name: 'Tokyo Narita', lat: 35.7720, lon: 140.3929 },
-            { id: 'KIX', name: 'Osaka Kansai', lat: 34.4320, lon: 135.2304 }, { id: 'ICN', name: 'Seoul Incheon', lat: 37.4602, lon: 126.4407 },
-            { id: 'PEK', name: 'Pechino Capital', lat: 40.0799, lon: 116.6031 }, { id: 'PKX', name: 'Pechino Daxing', lat: 39.5098, lon: 116.4105 },
-            { id: 'PVG', name: 'Shanghai Pudong', lat: 31.1443, lon: 121.8083 }, { id: 'HKG', name: 'Hong Kong', lat: 22.3080, lon: 113.9185 },
-            { id: 'TPE', name: 'Taipei Taoyuan', lat: 25.0797, lon: 121.2342 }, { id: 'SIN', name: 'Singapore Changi', lat: 1.3644, lon: 103.9915 },
-            { id: 'BKK', name: 'Bangkok Suvarnabhumi', lat: 13.6900, lon: 100.7501 }, { id: 'KUL', name: 'Kuala Lumpur', lat: 2.7456, lon: 101.7099 },
-            { id: 'MNL', name: 'Manila', lat: 14.5086, lon: 121.0194 }, { id: 'SGN', name: 'Ho Chi Minh Tan Son Nhat', lat: 10.8188, lon: 106.6519 },
-            { id: 'CGK', name: 'Jakarta Soekarno-Hatta', lat: -6.1256, lon: 106.6559 }, { id: 'DEL', name: 'Nuova Delhi Indira Gandhi', lat: 28.5562, lon: 77.1000 },
-            { id: 'BOM', name: 'Mumbai Chhatrapati Shivaji', lat: 19.0896, lon: 72.8656 }, { id: 'DXB', name: 'Dubai International', lat: 25.2532, lon: 55.3657 },
-            { id: 'DOH', name: 'Doha Hamad', lat: 25.2731, lon: 51.6080 }, { id: 'AUH', name: 'Abu Dhabi', lat: 24.4330, lon: 54.6511 },
-            { id: 'TLV', name: 'Tel Aviv Ben Gurion', lat: 32.0055, lon: 34.8854 }, { id: 'DPS', name: 'Bali Denpasar', lat: -8.7482, lon: 115.1672 },
-            { id: 'MLE', name: 'Malé (Maldive)', lat: 4.1918, lon: 73.5291 }, { id: 'HAN', name: 'Hanoi Noi Bai', lat: 21.2212, lon: 105.8072 },
-            { id: 'CMB', name: 'Colombo Bandaranaike', lat: 7.1808, lon: 79.8841 }, { id: 'CAI', name: 'Il Cairo', lat: 30.1219, lon: 31.4056 },
-            { id: 'JNB', name: 'Johannesburg O.R. Tambo', lat: -26.1367, lon: 28.2411 }, { id: 'CPT', name: 'Città del Capo', lat: -33.9715, lon: 18.6021 },
-            { id: 'LOS', name: 'Lagos Murtala Muhammed', lat: 6.5774, lon: 3.3215 }, { id: 'NBO', name: 'Nairobi Jomo Kenyatta', lat: -1.3192, lon: 36.9275 },
-            { id: 'ADD', name: 'Addis Ababa Bole', lat: 8.9778, lon: 38.7993 }, { id: 'CMN', name: 'Casablanca Mohammed V', lat: 33.3675, lon: -7.5899 },
-            { id: 'RAK', name: 'Marrakech Menara', lat: 31.6069, lon: -8.0363 }, { id: 'TUN', name: 'Tunisi Cartagine', lat: 36.8510, lon: 10.2272 },
-            { id: 'SEZ', name: 'Seychelles', lat: -4.6743, lon: 55.5219 }, { id: 'MRU', name: 'Mauritius', lat: -20.4302, lon: 57.6836 },
-            { id: 'SYD', name: 'Sydney Kingsford Smith', lat: -33.9399, lon: 151.1753 }, { id: 'MEL', name: 'Melbourne', lat: -37.6690, lon: 144.8410 },
-            { id: 'BNE', name: 'Brisbane', lat: -27.3842, lon: 153.1175 }, { id: 'PER', name: 'Perth', lat: -31.9385, lon: 115.9672 },
-            { id: 'AKL', name: 'Auckland', lat: -37.0082, lon: 174.7850 }, { id: 'CHC', name: 'Christchurch', lat: -43.4876, lon: 172.5369 },
-            { id: 'NAN', name: 'Nadi (Fiji)', lat: -17.7554, lon: 177.4433 }, { id: 'PPT', name: 'Papeete (Tahiti)', lat: -17.5567, lon: -149.6108 },
+            { id: 'FCO', name: 'Roma Fiumicino', name_en: 'Rome Fiumicino', lat: 41.8003, lon: 12.2462 },
+            { id: 'CIA', name: 'Roma Ciampino', name_en: 'Rome Ciampino', lat: 41.7994, lon: 12.5926 },
+            { id: 'MXP', name: 'Milano Malpensa', name_en: 'Milan Malpensa', lat: 45.6289, lon: 8.7251 },
+            { id: 'LIN', name: 'Milano Linate', name_en: 'Milan Linate', lat: 45.4613, lon: 9.2795 },
+            { id: 'BGY', name: 'Milano Bergamo', name_en: 'Milan Bergamo', lat: 45.6701, lon: 9.7042 },
+            { id: 'VCE', name: 'Venezia Marco Polo', name_en: 'Venice Marco Polo', lat: 45.5053, lon: 12.3519 },
+            { id: 'NAP', name: 'Napoli Capodichino', name_en: 'Naples Capodichino', lat: 40.8844, lon: 14.2908 },
+            { id: 'CTA', name: 'Catania Fontanarossa', name_en: 'Catania Fontanarossa', lat: 37.4668, lon: 15.0664 },
+            { id: 'PMO', name: 'Palermo Punta Raisi', name_en: 'Palermo Punta Raisi', lat: 38.1760, lon: 13.0911 },
+            { id: 'BLQ', name: 'Bologna Guglielmo Marconi', name_en: 'Bologna Guglielmo Marconi', lat: 44.5354, lon: 11.2887 },
+            { id: 'TRN', name: 'Torino Caselle', name_en: 'Turin Caselle', lat: 45.2008, lon: 7.6496 },
+            { id: 'CAG', name: 'Cagliari Elmas', name_en: 'Cagliari Elmas', lat: 39.2515, lon: 9.0543 },
+            { id: 'BRI', name: 'Bari Karol Wojtyła', name_en: 'Bari Karol Wojtyła', lat: 41.1389, lon: 16.7606 },
+            { id: 'VRN', name: 'Verona Villafranca', name_en: 'Verona Villafranca', lat: 45.3957, lon: 10.8885 },
+            { id: 'LHR', name: 'Londra Heathrow', name_en: 'London Heathrow', lat: 51.4700, lon: -0.4543 },
+            { id: 'LGW', name: 'Londra Gatwick', name_en: 'London Gatwick', lat: 51.1537, lon: -0.1821 },
+            { id: 'CDG', name: 'Parigi CDG', name_en: 'Paris CDG', lat: 49.0097, lon: 2.5479 },
+            { id: 'ORY', name: 'Parigi Orly', name_en: 'Paris Orly', lat: 48.7233, lon: 2.3794 },
+            { id: 'FRA', name: 'Francoforte', name_en: 'Frankfurt', lat: 50.0379, lon: 8.5622 },
+            { id: 'MUC', name: 'Monaco', name_en: 'Munich', lat: 48.3537, lon: 11.7750 },
+            { id: 'BER', name: 'Berlino Brandeburgo', name_en: 'Berlin Brandenburg', lat: 52.3667, lon: 13.5033 },
+            { id: 'AMS', name: 'Amsterdam', name_en: 'Amsterdam', lat: 52.3086, lon: 4.7639 },
+            { id: 'MAD', name: 'Madrid', name_en: 'Madrid', lat: 40.4839, lon: -3.5679 },
+            { id: 'BCN', name: 'Barcellona El Prat', name_en: 'Barcelona El Prat', lat: 41.2974, lon: 2.0833 },
+            { id: 'ZRH', name: 'Zurigo', name_en: 'Zurich', lat: 47.4582, lon: 8.5555 },
+            { id: 'GVA', name: 'Ginevra', name_en: 'Geneva', lat: 46.2370, lon: 6.1092 },
+            { id: 'VIE', name: 'Vienna', name_en: 'Vienna', lat: 48.1103, lon: 16.5697 },
+            { id: 'BRU', name: 'Bruxelles', name_en: 'Brussels', lat: 50.9014, lon: 4.4844 },
+            { id: 'ATH', name: 'Atene', name_en: 'Athens', lat: 37.9364, lon: 23.9445 },
+            { id: 'IST', name: 'Istanbul', name_en: 'Istanbul', lat: 41.2753, lon: 28.7519 },
+            { id: 'DUB', name: 'Dublino', name_en: 'Dublin', lat: 53.4264, lon: -6.2499 },
+            { id: 'LIS', name: 'Lisbona', name_en: 'Lisbon', lat: 38.7742, lon: -9.1342 },
+            { id: 'OSL', name: 'Oslo', name_en: 'Oslo', lat: 60.1976, lon: 11.1004 },
+            { id: 'ARN', name: 'Stoccolma', name_en: 'Stockholm', lat: 59.6498, lon: 17.9238 },
+            { id: 'CPH', name: 'Copenhagen', name_en: 'Copenhagen', lat: 55.6180, lon: 12.6508 },
+            { id: 'HEL', name: 'Helsinki', name_en: 'Helsinki', lat: 60.3172, lon: 24.9633 },
+            { id: 'WAW', name: 'Varsavia', name_en: 'Warsaw', lat: 52.1672, lon: 20.9679 },
+            { id: 'KEF', name: 'Reykjavik', name_en: 'Reykjavik', lat: 63.9850, lon: -22.6056 },
+            { id: 'SVO', name: 'Mosca Sheremetyevo', name_en: 'Moscow Sheremetyevo', lat: 55.9726, lon: 37.4146 },
+            { id: 'PRG', name: 'Praga', name_en: 'Prague', lat: 50.1008, lon: 14.2600 },
+            { id: 'BUD', name: 'Budapest', name_en: 'Budapest', lat: 47.4369, lon: 19.2556 },
+            { id: 'NCE', name: 'Nizza', name_en: 'Nice', lat: 43.6617, lon: 7.2167 },
+            { id: 'MLA', name: 'Malta', name_en: 'Malta', lat: 35.8575, lon: 14.4775 },
+            { id: 'EDI', name: 'Edimburgo', name_en: 'Edinburgh', lat: 55.9508, lon: -3.3615 },
+            { id: 'JFK', name: 'New York JFK', name_en: 'New York JFK', lat: 40.6413, lon: -73.7781 },
+            { id: 'EWR', name: 'Newark Liberty', name_en: 'Newark Liberty', lat: 40.6895, lon: -74.1745 },
+            { id: 'LAX', name: 'Los Angeles', name_en: 'Los Angeles', lat: 33.9416, lon: -118.4085 },
+            { id: 'SFO', name: 'San Francisco', name_en: 'San Francisco', lat: 37.6213, lon: -122.3790 },
+            { id: 'ORD', name: 'Chicago O\'Hare', name_en: 'Chicago O\'Hare', lat: 41.9742, lon: -87.9073 },
+            { id: 'ATL', name: 'Atlanta Hartsfield-Jackson', name_en: 'Atlanta Hartsfield-Jackson', lat: 33.6407, lon: -84.4277 },
+            { id: 'DFW', name: 'Dallas/Fort Worth', name_en: 'Dallas/Fort Worth', lat: 32.8998, lon: -97.0403 },
+            { id: 'DEN', name: 'Denver', name_en: 'Denver', lat: 39.8561, lon: -104.6737 },
+            { id: 'MIA', name: 'Miami', name_en: 'Miami', lat: 25.7959, lon: -80.2870 },
+            { id: 'MCO', name: 'Orlando', name_en: 'Orlando', lat: 28.4312, lon: -81.3081 },
+            { id: 'SEA', name: 'Seattle Tacoma', name_en: 'Seattle Tacoma', lat: 47.4502, lon: -122.3116 },
+            { id: 'BOS', name: 'Boston Logan', name_en: 'Boston Logan', lat: 42.3656, lon: -71.0096 },
+            { id: 'LAS', name: 'Las Vegas', name_en: 'Las Vegas', lat: 36.0840, lon: -115.1537 },
+            { id: 'YYZ', name: 'Toronto Pearson', name_en: 'Toronto Pearson', lat: 43.6777, lon: -79.6248 },
+            { id: 'YVR', name: 'Vancouver', name_en: 'Vancouver', lat: 49.1947, lon: -123.1763 },
+            { id: 'YUL', name: 'Montréal Trudeau', name_en: 'Montreal Trudeau', lat: 45.4657, lon: -73.7455 },
+            { id: 'HNL', name: 'Honolulu', name_en: 'Honolulu', lat: 21.3187, lon: -157.9225 },
+            { id: 'MEX', name: 'Città del Messico', name_en: 'Mexico City', lat: 19.4361, lon: -99.0719 },
+            { id: 'IAD', name: 'Washington Dulles', name_en: 'Washington Dulles', lat: 38.9445, lon: -77.4558 },
+            { id: 'PHX', name: 'Phoenix Sky Harbor', name_en: 'Phoenix Sky Harbor', lat: 33.4352, lon: -112.0101 },
+            { id: 'ANC', name: 'Anchorage', name_en: 'Anchorage', lat: 61.1743, lon: -149.9962 },
+            { id: 'GRU', name: 'San Paolo Guarulhos', name_en: 'São Paulo Guarulhos', lat: -23.4356, lon: -46.4731 },
+            { id: 'GIG', name: 'Rio de Janeiro Galeão', name_en: 'Rio de Janeiro Galeão', lat: -22.8089, lon: -43.2436 },
+            { id: 'EZE', name: 'Buenos Aires Ezeiza', name_en: 'Buenos Aires Ezeiza', lat: -34.8150, lon: -58.5348 },
+            { id: 'SCL', name: 'Santiago del Cile', name_en: 'Santiago de Chile', lat: -33.3930, lon: -70.7858 },
+            { id: 'BOG', name: 'Bogotà El Dorado', name_en: 'Bogota El Dorado', lat: 4.7016, lon: -74.1469 },
+            { id: 'LIM', name: 'Lima Jorge Chávez', name_en: 'Lima Jorge Chávez', lat: -12.0240, lon: -77.1143 },
+            { id: 'PTY', name: 'Panama City Tocumen', name_en: 'Panama City Tocumen', lat: 9.0714, lon: -79.3835 },
+            { id: 'CUN', name: 'Cancún', name_en: 'Cancun', lat: 21.0365, lon: -86.8771 },
+            { id: 'SJO', name: 'San José (Costa Rica)', name_en: 'San Jose (Costa Rica)', lat: 9.9939, lon: -84.2088 },
+            { id: 'UIO', name: 'Quito', name_en: 'Quito', lat: -0.1292, lon: -78.3575 },
+            { id: 'MVD', name: 'Montevideo', name_en: 'Montevideo', lat: -34.8384, lon: -56.0308 },
+            { id: 'HND', name: 'Tokyo Haneda', name_en: 'Tokyo Haneda', lat: 35.5494, lon: 139.7798 },
+            { id: 'NRT', name: 'Tokyo Narita', name_en: 'Tokyo Narita', lat: 35.7720, lon: 140.3929 },
+            { id: 'KIX', name: 'Osaka Kansai', name_en: 'Osaka Kansai', lat: 34.4320, lon: 135.2304 },
+            { id: 'ICN', name: 'Seoul Incheon', name_en: 'Seoul Incheon', lat: 37.4602, lon: 126.4407 },
+            { id: 'PEK', name: 'Pechino Capital', name_en: 'Beijing Capital', lat: 40.0799, lon: 116.6031 },
+            { id: 'PKX', name: 'Pechino Daxing', name_en: 'Beijing Daxing', lat: 39.5098, lon: 116.4105 },
+            { id: 'PVG', name: 'Shanghai Pudong', name_en: 'Shanghai Pudong', lat: 31.1443, lon: 121.8083 },
+            { id: 'HKG', name: 'Hong Kong', name_en: 'Hong Kong', lat: 22.3080, lon: 113.9185 },
+            { id: 'TPE', name: 'Taipei Taoyuan', name_en: 'Taipei Taoyuan', lat: 25.0797, lon: 121.2342 },
+            { id: 'SIN', name: 'Singapore Changi', name_en: 'Singapore Changi', lat: 1.3644, lon: 103.9915 },
+            { id: 'BKK', name: 'Bangkok Suvarnabhumi', name_en: 'Bangkok Suvarnabhumi', lat: 13.6900, lon: 100.7501 },
+            { id: 'KUL', name: 'Kuala Lumpur', name_en: 'Kuala Lumpur', lat: 2.7456, lon: 101.7099 },
+            { id: 'MNL', name: 'Manila', name_en: 'Manila', lat: 14.5086, lon: 121.0194 },
+            { id: 'SGN', name: 'Ho Chi Minh Tan Son Nhat', name_en: 'Ho Chi Minh Tan Son Nhat', lat: 10.8188, lon: 106.6519 },
+            { id: 'CGK', name: 'Jakarta Soekarno-Hatta', name_en: 'Jakarta Soekarno-Hatta', lat: -6.1256, lon: 106.6559 },
+            { id: 'DEL', name: 'Nuova Delhi Indira Gandhi', name_en: 'New Delhi Indira Gandhi', lat: 28.5562, lon: 77.1000 },
+            { id: 'BOM', name: 'Mumbai Chhatrapati Shivaji', name_en: 'Mumbai Chhatrapati Shivaji', lat: 19.0896, lon: 72.8656 },
+            { id: 'DXB', name: 'Dubai International', name_en: 'Dubai International', lat: 25.2532, lon: 55.3657 },
+            { id: 'DOH', name: 'Doha Hamad', name_en: 'Doha Hamad', lat: 25.2731, lon: 51.6080 },
+            { id: 'AUH', name: 'Abu Dhabi', name_en: 'Abu Dhabi', lat: 24.4330, lon: 54.6511 },
+            { id: 'TLV', name: 'Tel Aviv Ben Gurion', name_en: 'Tel Aviv Ben Gurion', lat: 32.0055, lon: 34.8854 },
+            { id: 'DPS', name: 'Bali Denpasar', name_en: 'Bali Denpasar', lat: -8.7482, lon: 115.1672 },
+            { id: 'MLE', name: 'Malé (Maldive)', name_en: 'Male (Maldives)', lat: 4.1918, lon: 73.5291 },
+            { id: 'HAN', name: 'Hanoi Noi Bai', name_en: 'Hanoi Noi Bai', lat: 21.2212, lon: 105.8072 },
+            { id: 'CMB', name: 'Colombo Bandaranaike', name_en: 'Colombo Bandaranaike', lat: 7.1808, lon: 79.8841 },
+            { id: 'CAI', name: 'Il Cairo', name_en: 'Cairo', lat: 30.1219, lon: 31.4056 },
+            { id: 'JNB', name: 'Johannesburg O.R. Tambo', name_en: 'Johannesburg O.R. Tambo', lat: -26.1367, lon: 28.2411 },
+            { id: 'CPT', name: 'Città del Capo', name_en: 'Cape Town', lat: -33.9715, lon: 18.6021 },
+            { id: 'LOS', name: 'Lagos Murtala Muhammed', name_en: 'Lagos Murtala Muhammed', lat: 6.5774, lon: 3.3215 },
+            { id: 'NBO', name: 'Nairobi Jomo Kenyatta', name_en: 'Nairobi Jomo Kenyatta', lat: -1.3192, lon: 36.9275 },
+            { id: 'ADD', name: 'Addis Ababa Bole', name_en: 'Addis Ababa Bole', lat: 8.9778, lon: 38.7993 },
+            { id: 'CMN', name: 'Casablanca Mohammed V', name_en: 'Casablanca Mohammed V', lat: 33.3675, lon: -7.5899 },
+            { id: 'RAK', name: 'Marrakech Menara', name_en: 'Marrakesh Menara', lat: 31.6069, lon: -8.0363 },
+            { id: 'TUN', name: 'Tunisi Cartagine', name_en: 'Tunis Carthage', lat: 36.8510, lon: 10.2272 },
+            { id: 'SEZ', name: 'Seychelles', name_en: 'Seychelles', lat: -4.6743, lon: 55.5219 },
+            { id: 'MRU', name: 'Mauritius', name_en: 'Mauritius', lat: -20.4302, lon: 57.6836 },
+            { id: 'SYD', name: 'Sydney Kingsford Smith', name_en: 'Sydney Kingsford Smith', lat: -33.9399, lon: 151.1753 },
+            { id: 'MEL', name: 'Melbourne', name_en: 'Melbourne', lat: -37.6690, lon: 144.8410 },
+            { id: 'BNE', name: 'Brisbane', name_en: 'Brisbane', lat: -27.3842, lon: 153.1175 },
+            { id: 'PER', name: 'Perth', name_en: 'Perth', lat: -31.9385, lon: 115.9672 },
+            { id: 'AKL', name: 'Auckland', name_en: 'Auckland', lat: -37.0082, lon: 174.7850 },
+            { id: 'CHC', name: 'Christchurch', name_en: 'Christchurch', lat: -43.4876, lon: 172.5369 },
+            { id: 'NAN', name: 'Nadi (Fiji)', name_en: 'Nadi (Fiji)', lat: -17.7554, lon: 177.4433 },
+            { id: 'PPT', name: 'Papeete (Tahiti)', name_en: 'Papeete (Tahiti)', lat: -17.5567, lon: -149.6108 },
 
             // --- NUOVI 30 AEROPORTI AGGIUNTI (Europa Est, Africa, Asia, Oceania) ---
-            { id: 'LYS', name: 'Lione Saint-Exupéry', lat: 45.7256, lon: 5.0811 },
-            { id: 'MRS', name: 'Marsiglia Provenza', lat: 43.4367, lon: 5.2150 },
-            { id: 'MAN', name: 'Manchester', lat: 53.3656, lon: -2.2734 },
-            { id: 'BHX', name: 'Birmingham', lat: 52.4539, lon: -1.7480 },
-            { id: 'GLA', name: 'Glasgow', lat: 55.8719, lon: -4.4331 },
-            { id: 'HAM', name: 'Amburgo', lat: 53.6304, lon: 9.9882 },
-            { id: 'DUS', name: 'Düsseldorf', lat: 51.2895, lon: 6.7668 },
-            { id: 'STR', name: 'Stoccarda', lat: 48.6899, lon: 9.2220 },
-            { id: 'BEG', name: 'Belgrado Nikola Tesla', lat: 44.8184, lon: 20.3091 },
-            { id: 'SOF', name: 'Sofia', lat: 42.6967, lon: 23.4114 },
-            { id: 'OTP', name: 'Bucarest Otopeni', lat: 44.5722, lon: 26.1022 },
-            { id: 'ZAG', name: 'Zagabria Franjo Tuđman', lat: 45.7429, lon: 16.0688 },
-            { id: 'LJU', name: 'Lubiana Jože Pučnik', lat: 46.2237, lon: 14.4576 },
-            { id: 'TIA', name: 'Tirana', lat: 41.4147, lon: 19.7206 },
-            { id: 'KRK', name: 'Cracovia Giovanni Paolo II', lat: 50.0777, lon: 19.7848 },
-            { id: 'OPO', name: 'Porto Francisco Sá Carneiro', lat: 41.2481, lon: -8.6814 },
-            { id: 'AGP', name: 'Malaga Costa del Sol', lat: 36.6749, lon: -4.4991 },
-            { id: 'KTM', name: 'Kathmandu Tribhuvan', lat: 27.6966, lon: 85.3591 },
-            { id: 'DAC', name: 'Dacca Shahjalal', lat: 23.8433, lon: 90.3978 },
-            { id: 'RGN', name: 'Yangon', lat: 16.9073, lon: 96.1332 },
-            { id: 'CTS', name: 'Sapporo New Chitose', lat: 42.7752, lon: 141.6923 },
-            { id: 'FUK', name: 'Fukuoka', lat: 33.5859, lon: 130.4506 },
-            { id: 'ADL', name: 'Adelaide', lat: -34.9450, lon: 138.5306 },
-            { id: 'DRW', name: 'Darwin', lat: -12.4147, lon: 130.8767 },
-            { id: 'WLG', name: 'Wellington', lat: -41.3276, lon: 174.8076 },
-            { id: 'ZQN', name: 'Queenstown', lat: -45.0213, lon: 168.7390 },
-            { id: 'TBU', name: 'Nuku\'alofa Fua\'amotu', lat: -21.2413, lon: -175.1401 },
-            { id: 'ACC', name: 'Accra Kotoka', lat: 5.6052, lon: -0.1668 },
-            { id: 'KGL', name: 'Kigali', lat: -1.9686, lon: 30.1395 },
-            { id: 'TNR', name: 'Antananarivo Ivato', lat: -18.7969, lon: 47.4788 }
+            { id: 'LYS', name: 'Lione Saint-Exupéry', name_en: 'Lyon Saint-Exupéry', lat: 45.7256, lon: 5.0811 },
+            { id: 'MRS', name: 'Marsiglia Provenza', name_en: 'Marseille Provence', lat: 43.4367, lon: 5.2150 },
+            { id: 'MAN', name: 'Manchester', name_en: 'Manchester', lat: 53.3656, lon: -2.2734 },
+            { id: 'BHX', name: 'Birmingham', name_en: 'Birmingham', lat: 52.4539, lon: -1.7480 },
+            { id: 'GLA', name: 'Glasgow', name_en: 'Glasgow', lat: 55.8719, lon: -4.4331 },
+            { id: 'HAM', name: 'Amburgo', name_en: 'Hamburg', lat: 53.6304, lon: 9.9882 },
+            { id: 'DUS', name: 'Düsseldorf', name_en: 'Dusseldorf', lat: 51.2895, lon: 6.7668 },
+            { id: 'STR', name: 'Stoccarda', name_en: 'Stuttgart', lat: 48.6899, lon: 9.2220 },
+            { id: 'BEG', name: 'Belgrado Nikola Tesla', name_en: 'Belgrade Nikola Tesla', lat: 44.8184, lon: 20.3091 },
+            { id: 'SOF', name: 'Sofia', name_en: 'Sofia', lat: 42.6967, lon: 23.4114 },
+            { id: 'OTP', name: 'Bucarest Otopeni', name_en: 'Bucharest Otopeni', lat: 44.5722, lon: 26.1022 },
+            { id: 'ZAG', name: 'Zagabria Franjo Tuđman', name_en: 'Zagreb Franjo Tuđman', lat: 45.7429, lon: 16.0688 },
+            { id: 'LJU', name: 'Lubiana Jože Pučnik', name_en: 'Ljubljana Jože Pučnik', lat: 46.2237, lon: 14.4576 },
+            { id: 'TIA', name: 'Tirana', name_en: 'Tirana', lat: 41.4147, lon: 19.7206 },
+            { id: 'KRK', name: 'Cracovia Giovanni Paolo II', name_en: 'Krakow John Paul II', lat: 50.0777, lon: 19.7848 },
+            { id: 'OPO', name: 'Porto Francisco Sá Carneiro', name_en: 'Porto Francisco Sá Carneiro', lat: 41.2481, lon: -8.6814 },
+            { id: 'AGP', name: 'Malaga Costa del Sol', name_en: 'Malaga Costa del Sol', lat: 36.6749, lon: -4.4991 },
+            { id: 'KTM', name: 'Kathmandu Tribhuvan', name_en: 'Kathmandu Tribhuvan', lat: 27.6966, lon: 85.3591 },
+            { id: 'DAC', name: 'Dacca Shahjalal', name_en: 'Dhaka Shahjalal', lat: 23.8433, lon: 90.3978 },
+            { id: 'RGN', name: 'Yangon', name_en: 'Yangon', lat: 16.9073, lon: 96.1332 },
+            { id: 'CTS', name: 'Sapporo New Chitose', name_en: 'Sapporo New Chitose', lat: 42.7752, lon: 141.6923 },
+            { id: 'FUK', name: 'Fukuoka', name_en: 'Fukuoka', lat: 33.5859, lon: 130.4506 },
+            { id: 'ADL', name: 'Adelaide', name_en: 'Adelaide', lat: -34.9450, lon: 138.5306 },
+            { id: 'DRW', name: 'Darwin', name_en: 'Darwin', lat: -12.4147, lon: 130.8767 },
+            { id: 'WLG', name: 'Wellington', name_en: 'Wellington', lat: -41.3276, lon: 174.8076 },
+            { id: 'ZQN', name: 'Queenstown', name_en: 'Queenstown', lat: -45.0213, lon: 168.7390 },
+            { id: 'TBU', name: 'Nuku\'alofa Fua\'amotu', name_en: 'Nuku\'alofa Fua\'amotu', lat: -21.2413, lon: -175.1401 },
+            { id: 'ACC', name: 'Accra Kotoka', name_en: 'Accra Kotoka', lat: 5.6052, lon: -0.1668 },
+            { id: 'KGL', name: 'Kigali', name_en: 'Kigali', lat: -1.9686, lon: 30.1395 },
+            { id: 'TNR', name: 'Antananarivo Ivato', name_en: 'Antananarivo Ivato', lat: -18.7969, lon: 47.4788 }
         ];
+        
+        // Initial sort in Italian
         airports.sort((a, b) => a.name.localeCompare(b.name));
 
         const map = L.map('map', {
@@ -900,9 +1000,23 @@
         const airportDotStyle = {
             radius: 4, fillColor: "rgba(248, 250, 252, 0.7)", color: "rgba(56, 189, 248, 0.8)", weight: 1.5, opacity: 1, fillOpacity: 0.7
         };
+        
+        // INIT AIRPORTS MARKERS AND SELECTS
+        const depSelect = document.getElementById('departure');
+        const arrSelect = document.getElementById('arrival');
+
         airports.forEach(ap => {
-            L.circleMarker([ap.lat, ap.lon], airportDotStyle).addTo(map).bindTooltip(ap.name);
+            // Markers
+            const marker = L.circleMarker([ap.lat, ap.lon], airportDotStyle).addTo(map);
+            marker.bindTooltip(ap.name);
+            marker.airportId = ap.id; // Store ID for language updates
+
+            // Select Options
+            const label = `${ap.name} (${ap.id})`;
+            depSelect.add(new Option(label, ap.id)); 
+            arrSelect.add(new Option(label, ap.id));
         });
+        depSelect.value = 'FCO'; arrSelect.value = 'JFK';
 
         let flightSpeedMultiplier = 1;
         function setSpeed(mult) {
@@ -910,14 +1024,6 @@
             document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
             event.target.classList.add('active');
         }
-
-        const depSelect = document.getElementById('departure');
-        const arrSelect = document.getElementById('arrival');
-        airports.forEach(ap => {
-            const label = `${ap.name} (${ap.id})`;
-            depSelect.add(new Option(label, ap.id)); arrSelect.add(new Option(label, ap.id));
-        });
-        depSelect.value = 'FCO'; arrSelect.value = 'JFK';
 
         function randomizeRoute() {
             let depIndex = Math.floor(Math.random() * airports.length);
@@ -1294,4 +1400,3 @@
     </script>
 </body>
 </html>
-
