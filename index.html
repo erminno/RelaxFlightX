@@ -1130,10 +1130,12 @@
                     progress += (1 * flightSpeedMultiplier * decelerationFactor);
                     pct = Math.min(progress / totalSteps, 1);
                     
-                    if (isFollowingPlane || map.getZoom() < landingZoomLevel) {
+                    // FIX: Zoom e pan automatico SOLO se l'utente sta seguendo l'aereo
+                    if (isFollowingPlane && map.getZoom() < landingZoomLevel) {
                          const currentZoom = map.getZoom();
                          const targetZoom = Math.min(landingZoomLevel, currentZoom + 0.05); 
-                         map.setZoom(targetZoom); map.panTo(planeMarker.getLatLng());
+                         map.setZoom(targetZoom); 
+                         map.panTo(planeMarker.getLatLng());
                     }
                 } else if (pct >= 1) { endFlight(); return; }
 
