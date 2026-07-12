@@ -180,6 +180,28 @@
         .game-ui { opacity: 0; transition: opacity 1.5s ease-in-out; pointer-events: none; }
         .game-ui.visible { opacity: 1; pointer-events: auto; }
 
+        /* --- NASCONDI UI (mobile): elemento nascosto manualmente dall'utente --- */
+        .ui-manually-hidden { display: none !important; }
+        .mobile-only-row { display: none; }
+        .hideui-row {
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px; padding: 0.7rem 0.9rem;
+        }
+        .hideui-row span { font-size: 0.85rem; font-weight: 600; color: white; }
+        #show-ui-fab {
+            position: fixed; z-index: 500; bottom: 14px; right: 14px;
+            width: 44px; height: 44px; border-radius: 50%; border: none;
+            background: rgba(15,23,42,0.85); color: var(--primary);
+            box-shadow: 0 4px 18px rgba(0,0,0,0.5); border: 1px solid rgba(56,189,248,0.4);
+            display: none; align-items: center; justify-content: center; font-size: 1.1rem;
+        }
+        #show-ui-fab.visible { display: flex; }
+
+        @media (max-width: 768px) {
+            .mobile-only-row { display: block; }
+        }
+
         #day-night-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at center, transparent 30%, rgba(2, 6, 23, 0.95) 100%);
@@ -546,7 +568,7 @@
 
         .boarding-pass {
             --bp-primary: #0369a1; --bp-accent: #38bdf8; --bp-stub-bg: #1e293b; --bp-stub-bg2: #0f172a;
-            position: relative; display: flex; background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            position: relative; display: flex; background: transparent;
             border-radius: 20px; overflow: visible; box-shadow: 0 25px 80px rgba(0,0,0,0.7);
             color: #0f172a; font-family: 'Inter', sans-serif; min-height: 200px;
             transition: box-shadow 0.4s ease;
@@ -554,6 +576,7 @@
         .bp-main {
             flex: 1; padding: 1.7rem 1.5rem; text-align: left; position: relative;
             border-radius: 20px 0 0 20px; overflow: hidden;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
             border-top: 5px solid var(--bp-primary);
             border-right: 2px dashed rgba(15,23,42,0.25);
             transition: clip-path 0.55s cubic-bezier(.36,.66,.32,1);
@@ -802,11 +825,43 @@
                 </div>
             </div>
 
+            <div class="settings-section mobile-only-row" id="settings-interface-section">
+                <div class="settings-section-title"><i class="fa-solid fa-eye-slash"></i> <span data-translate="settings_interface">Interfaccia</span></div>
+                <button class="btn btn-outline" style="width:100%;" onclick="openHideUiModal()">
+                    <i class="fa-solid fa-eye-slash"></i> <span data-translate="settings_hide_ui">Nascondi</span>
+                </button>
+            </div>
+
             <div class="settings-btn-row">
                 <button class="btn btn-outline" id="settings-back-to-menu" onclick="backToMainMenu()" style="display:none;">
                     <i class="fa-solid fa-house"></i> <span data-translate="settings_back_menu">Torna al Menu</span>
                 </button>
                 <button class="btn btn-primary" onclick="closeSettingsModal()">
+                    <i class="fa-solid fa-check"></i> <span data-translate="settings_close">Chiudi</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="hide-ui-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeHideUiModal()">&times;</button>
+            <div class="modal-title">
+                <i class="fa-solid fa-eye-slash"></i> <span data-translate="hideui_title">Nascondi Interfaccia</span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.82rem; margin: -0.8rem 0 1.2rem 0; line-height: 1.4;" data-translate="hideui_desc">
+                Scegli quali elementi nascondere durante il volo. Orario e dettagli volo restano sempre visibili.
+            </p>
+
+            <div class="settings-section">
+                <div id="hide-ui-list" style="display:flex; flex-direction:column; gap:0.7rem;"></div>
+            </div>
+
+            <div class="settings-btn-row">
+                <button class="btn btn-outline" onclick="resetHideUi()">
+                    <i class="fa-solid fa-rotate-left"></i> <span data-translate="hideui_showall">Mostra Tutto</span>
+                </button>
+                <button class="btn btn-primary" onclick="closeHideUiModal()">
                     <i class="fa-solid fa-check"></i> <span data-translate="settings_close">Chiudi</span>
                 </button>
             </div>
@@ -888,6 +943,10 @@
         </div>
         <div class="credits">Game designed by Minno</div>
     </div>
+
+    <button id="show-ui-fab" onclick="openHideUiModal()" title="Mostra/Nascondi UI">
+        <i class="fa-solid fa-eye"></i>
+    </button>
 
     <div id="eta-display" class="eta-panel game-ui">
         <i class="fa-regular fa-clock"></i> 
@@ -1073,6 +1132,11 @@
                 settings: "Impostazioni", settings_language: "Lingua", settings_audio: "Audio",
                 settings_mute_all: "Disattiva tutti i suoni", settings_music: "Musica di sottofondo", settings_sfx: "Effetti sonori",
                 settings_back_menu: "Torna al Menu", settings_close: "Chiudi", settings_fullscreen: "Schermo Intero", status_paused: "IN PAUSA",
+                settings_interface: "Interfaccia", settings_hide_ui: "Nascondi",
+                hideui_title: "Nascondi Interfaccia", hideui_desc: "Scegli quali elementi nascondere durante il volo. Orario e dettagli volo restano sempre visibili.",
+                hideui_showall: "Mostra Tutto", hideui_sidebar: "Barra Controlli", hideui_controls: "Pulsanti Volo (Pausa/Mappa)",
+                hideui_news: "Pulsante News", hideui_speed: "Controlli Velocità", hideui_env: "Ora Locale / Meteo",
+                hideui_follow: "Pulsante Segui Aereo", hideui_cabin: "Info Cabina",
                 seat_title: "Seleziona il tuo Posto", seat_free: "Libero", seat_taken: "Occupato", seat_selected: "Selezionato",
                 seat_front: "Fronte Cabina", seat_rear: "Retro Cabina",
                 seat_confirm: "Conferma e Imbarca", bp_flight: "Volo", bp_aircraft: "Aereo", bp_gate: "Gate",
@@ -1099,6 +1163,11 @@
                 settings: "Settings", settings_language: "Language", settings_audio: "Audio",
                 settings_mute_all: "Mute all sounds", settings_music: "Background music", settings_sfx: "Sound effects",
                 settings_back_menu: "Back to Menu", settings_close: "Close", settings_fullscreen: "Fullscreen", status_paused: "PAUSED",
+                settings_interface: "Interface", settings_hide_ui: "Hide",
+                hideui_title: "Hide Interface", hideui_desc: "Choose which elements to hide during the flight. Time and flight details always stay visible.",
+                hideui_showall: "Show All", hideui_sidebar: "Control Bar", hideui_controls: "Flight Buttons (Pause/Map)",
+                hideui_news: "News Button", hideui_speed: "Speed Controls", hideui_env: "Local Time / Weather",
+                hideui_follow: "Follow Plane Button", hideui_cabin: "Cabin Info",
                 seat_title: "Choose your Seat", seat_free: "Free", seat_taken: "Taken", seat_selected: "Selected",
                 seat_front: "Cabin Front", seat_rear: "Cabin Rear",
                 seat_confirm: "Confirm and Board", bp_flight: "Flight", bp_aircraft: "Aircraft", bp_gate: "Gate",
@@ -1151,6 +1220,9 @@
                 const key = el.getAttribute('data-translate');
                 if (t[key]) el.innerText = t[key];
             });
+            if (document.getElementById('hide-ui-modal') && document.getElementById('hide-ui-modal').classList.contains('open')) {
+                buildHideUiList();
+            }
             const acSelect = document.getElementById('aircraft-type');
             acSelect.options[0].text = t.ac_a320; acSelect.options[1].text = t.ac_b787;
             acSelect.options[2].text = t.ac_c172; acSelect.options[3].text = t.ac_conc;
@@ -1474,6 +1546,85 @@
         }
         function closeSettingsModal() { document.getElementById('settings-modal').classList.remove('open'); }
 
+        // --- NASCONDI UI (solo mobile) ---
+        // Elementi che l'utente può nascondere. Tempo (eta-panel), Dati Volo (telemetry-dropdown)
+        // e il pannello impostazioni (per poter sempre riaprire questo menu) NON sono inclusi.
+        const HIDEABLE_UI_ITEMS = [
+            { id: 'sidebar',    selector: '#control-sidebar',   icon: 'fa-sliders',      labelKey: 'hideui_sidebar' },
+            { id: 'controls',   selector: '#center-controls',   icon: 'fa-gamepad',      labelKey: 'hideui_controls' },
+            { id: 'news',       selector: '.news-btn-wrapper',  icon: 'fa-newspaper',    labelKey: 'hideui_news' },
+            { id: 'speed',      selector: '.speed-controls',    icon: 'fa-forward',      labelKey: 'hideui_speed' },
+            { id: 'env',        selector: '#env-panel',         icon: 'fa-cloud-sun',    labelKey: 'hideui_env' },
+            { id: 'follow',     selector: '#follow-btn',        icon: 'fa-eye',          labelKey: 'hideui_follow' },
+            { id: 'cabin',      selector: '#telemetry-cabin',   icon: 'fa-chair',        labelKey: 'hideui_cabin' }
+        ];
+        let hiddenUiIds = [];
+
+        function loadHiddenUiState() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('rfx_hidden_ui') || '[]');
+                if (Array.isArray(saved)) hiddenUiIds = saved;
+            } catch(e) { hiddenUiIds = []; }
+            HIDEABLE_UI_ITEMS.forEach(item => applyUiVisibility(item, hiddenUiIds.includes(item.id)));
+            updateShowUiFab();
+        }
+        function saveHiddenUiState() {
+            localStorage.setItem('rfx_hidden_ui', JSON.stringify(hiddenUiIds));
+        }
+        function applyUiVisibility(item, hide) {
+            document.querySelectorAll(item.selector).forEach(el => {
+                el.classList.toggle('ui-manually-hidden', hide);
+            });
+        }
+        function updateShowUiFab() {
+            const fab = document.getElementById('show-ui-fab');
+            const isMobile = window.innerWidth <= 768;
+            fab.classList.toggle('visible', isMobile && hiddenUiIds.length > 0);
+        }
+        function toggleUiItem(id, hide) {
+            const item = HIDEABLE_UI_ITEMS.find(i => i.id === id);
+            if (!item) return;
+            hiddenUiIds = hide ? [...new Set([...hiddenUiIds, id])] : hiddenUiIds.filter(x => x !== id);
+            applyUiVisibility(item, hide);
+            saveHiddenUiState();
+            updateShowUiFab();
+            SoundManager.playClick();
+        }
+        function resetHideUi() {
+            hiddenUiIds = [];
+            HIDEABLE_UI_ITEMS.forEach(item => {
+                applyUiVisibility(item, false);
+                const cb = document.getElementById('hideui-toggle-' + item.id);
+                if (cb) cb.checked = false;
+            });
+            saveHiddenUiState();
+            updateShowUiFab();
+            SoundManager.playClick();
+        }
+        function buildHideUiList() {
+            const t = translations[currentLang];
+            const list = document.getElementById('hide-ui-list');
+            list.innerHTML = HIDEABLE_UI_ITEMS.map(item => `
+                <div class="hideui-row">
+                    <span><i class="fa-solid ${item.icon}" style="color:var(--primary); width:18px; text-align:center;"></i> ${t[item.labelKey] || item.labelKey}</span>
+                    <label class="switch-toggle">
+                        <input type="checkbox" id="hideui-toggle-${item.id}" ${hiddenUiIds.includes(item.id) ? 'checked' : ''} onchange="toggleUiItem('${item.id}', this.checked)">
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+            `).join('');
+        }
+        function openHideUiModal() {
+            SoundManager.resume();
+            buildHideUiList();
+            document.getElementById('hide-ui-modal').classList.add('open');
+            attachUISounds();
+        }
+        function closeHideUiModal() {
+            document.getElementById('hide-ui-modal').classList.remove('open');
+        }
+        window.addEventListener('resize', updateShowUiFab);
+
         function setSfxVolume(val) {
             const v = val / 100;
             SoundManager.setSfxVolume(v);
@@ -1520,6 +1671,7 @@
             // --- Carica impostazioni salvate ---
             const savedLang = localStorage.getItem('rfx_lang');
             if (savedLang) setLanguage(savedLang); else updateInterfaceText();
+            loadHiddenUiState();
 
             const st = SoundManager.getState();
             document.getElementById('sfx-volume').value = Math.round(st.sfxVol * 100);
