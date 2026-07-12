@@ -19,7 +19,7 @@
             --danger: #ef4444;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --sidebar-width: 380px;
+            --sidebar-width: 340px;
             --radius-lg: 24px;
             --radius-md: 16px;
         }
@@ -52,7 +52,25 @@
         #main-menu.visible { opacity: 1; }
         #main-menu.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 
-        .menu-content { text-align: center; color: white; animation: float 6s ease-in-out infinite; padding: 2rem; width: 100%; max-width: 600px; }
+        /* --- ANIMATED WORLD MAP BACKGROUND --- */
+        #menu-bg-map {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0; opacity: 0.65; filter: saturate(1.3) brightness(0.85);
+        }
+        #menu-bg-map .leaflet-control-attribution {
+            background: transparent !important; color: rgba(255,255,255,0.18) !important; font-size: 8px !important;
+        }
+        #menu-bg-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
+            background: radial-gradient(circle at center, rgba(15,23,42,0.55) 0%, rgba(15,23,42,0.94) 78%);
+            pointer-events: none;
+        }
+        .menu-map-credit {
+            margin-top: 14px; font-size: 0.6rem; color: rgba(255,255,255,0.2);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .menu-content { position: relative; z-index: 3; text-align: center; color: white; padding: 2rem; width: 100%; max-width: 600px; }
         .menu-icon { font-size: 5rem; color: var(--primary); margin-bottom: 20px; filter: drop-shadow(0 0 30px rgba(56,189,248,0.6)); }
         .menu-title { font-size: 3.5rem; font-weight: 800; letter-spacing: -2px; margin-bottom: 10px; background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .menu-subtitle { font-family: 'JetBrains Mono', monospace; color: var(--text-muted); font-size: 1rem; margin-bottom: 50px; letter-spacing: 1px; }
@@ -66,6 +84,97 @@
         .menu-btn:hover { transform: scale(1.05) translateY(-2px); box-shadow: 0 0 50px rgba(56,189,248,0.7); background: #fff; }
         
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+
+        /* --- MENU: SECONDARY ACTIONS (Impostazioni ecc.) --- */
+        .menu-secondary-actions { display: flex; gap: 14px; justify-content: center; margin-top: 18px; }
+        .menu-btn-secondary {
+            background: rgba(255,255,255,0.06); color: var(--text-main); border: 1px solid rgba(255,255,255,0.2);
+            padding: 12px 26px; font-size: 0.9rem; font-weight: 700; border-radius: 50px; cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); backdrop-filter: blur(8px);
+            display: inline-flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .menu-btn-secondary:hover { background: rgba(255,255,255,0.14); transform: translateY(-2px); border-color: var(--primary); color: var(--primary); }
+
+        .menu-version { margin-top: 34px; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: rgba(255,255,255,0.35); letter-spacing: 1px; }
+
+        /* --- ICON BUTTONS (gear, mute, back) --- */
+        .icon-btn {
+            width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            background: rgba(15, 23, 42, 0.85); color: var(--text-main); border: 1px solid rgba(255,255,255,0.2);
+            cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(12px); box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            font-size: 1rem; flex-shrink: 0;
+        }
+        .icon-btn:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px) rotate(0deg); color: var(--primary); }
+        .icon-btn.spin-hover:hover i { transform: rotate(90deg); }
+        .icon-btn.spin-hover i { transition: transform 0.4s ease; display: block; }
+        .icon-btn.muted { color: var(--danger); }
+
+        /* --- SETTINGS MODAL --- */
+        .settings-section { margin-bottom: 1.6rem; }
+        .settings-section:last-child { margin-bottom: 0; }
+        .settings-section-title {
+            font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;
+            letter-spacing: 1.5px; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 8px;
+        }
+        .settings-section-title i { color: var(--primary); }
+
+        .lang-toggle-row { display: flex; gap: 10px; }
+        .lang-option {
+            flex: 1; padding: 12px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(30, 41, 59, 0.6); color: var(--text-muted); cursor: pointer; font-weight: 700;
+            font-size: 0.9rem; transition: all 0.25s ease; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .lang-option:hover { background: rgba(30, 41, 59, 0.9); color: white; }
+        .lang-option.active { background: var(--primary); color: #0f172a; border-color: var(--primary); box-shadow: 0 0 15px rgba(56,189,248,0.4); }
+
+        .volume-row { display: flex; align-items: center; gap: 14px; margin-bottom: 1rem; }
+        .volume-row:last-child { margin-bottom: 0; }
+        .volume-row .icon-btn { width: 38px; height: 38px; font-size: 0.9rem; }
+        .volume-row-label { flex: 1; }
+        .volume-row-label .vr-title { font-size: 0.85rem; font-weight: 600; color: white; margin-bottom: 6px; display:flex; justify-content: space-between; }
+        .volume-row-label .vr-value { color: var(--primary); font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; }
+
+        input[type="range"] {
+            -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 10px;
+            background: rgba(255,255,255,0.12); outline: none; cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%;
+            background: var(--primary); cursor: pointer; box-shadow: 0 0 10px rgba(56,189,248,0.7); border: 2px solid #0f172a;
+            transition: transform 0.2s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+        input[type="range"]::-moz-range-thumb {
+            width: 18px; height: 18px; border-radius: 50%; background: var(--primary); cursor: pointer; border: 2px solid #0f172a;
+            box-shadow: 0 0 10px rgba(56,189,248,0.7);
+        }
+        input[type="range"]:disabled { opacity: 0.35; cursor: not-allowed; }
+
+        .mute-all-row {
+            display: flex; align-items: center; justify-content: space-between; padding: 14px 16px;
+            background: rgba(30, 41, 59, 0.5); border-radius: 14px; border: 1px solid rgba(255,255,255,0.08);
+        }
+        .mute-all-row span { font-size: 0.9rem; font-weight: 600; color: white; }
+
+        .switch-toggle { position: relative; width: 48px; height: 26px; }
+        .switch-toggle input { opacity: 0; width: 0; height: 0; }
+        .switch-slider {
+            position: absolute; cursor: pointer; inset: 0; background: rgba(255,255,255,0.15);
+            border-radius: 30px; transition: 0.3s;
+        }
+        .switch-slider::before {
+            content: ""; position: absolute; height: 20px; width: 20px; left: 3px; top: 3px;
+            background: white; border-radius: 50%; transition: 0.3s;
+        }
+        .switch-toggle input:checked + .switch-slider { background: var(--primary); }
+        .switch-toggle input:checked + .switch-slider::before { transform: translateX(22px); }
+
+        .settings-btn-row { display: flex; gap: 10px; margin-top: 2rem; }
+        .settings-btn-row .btn { padding: 0.9rem; font-size: 0.85rem; }
+        .btn-outline {
+            background: transparent; border: 1px solid rgba(255,255,255,0.2); color: var(--text-main);
+        }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: rgba(56,189,248,0.08); }
 
         /* --- GAME UI --- */
         .game-ui { opacity: 0; transition: opacity 1.5s ease-in-out; pointer-events: none; }
@@ -236,14 +345,14 @@
         }
 
         .header {
-            padding: 1.5rem; background: linear-gradient(to right, rgba(255, 255, 255, 0.03), transparent);
-            border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 12px;
+            padding: 1.15rem 1.3rem; background: linear-gradient(to right, rgba(255, 255, 255, 0.03), transparent);
+            border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 10px;
         }
-        .brand { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.5px; color: var(--primary); text-transform: uppercase; }
-        .content { padding: 1.5rem; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 1rem; }
+        .brand { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.5px; color: var(--primary); text-transform: uppercase; }
+        .content { padding: 1.15rem; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 0.8rem; }
 
         .control-group { margin-bottom: 0.5rem; position: relative; }
-        label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; }
+        label { display: block; font-size: 0.68rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 1px; }
 
         .select-wrapper { position: relative; }
         .select-wrapper::after {
@@ -252,8 +361,8 @@
         }
 
         select {
-            width: 100%; padding: 1rem; background: rgba(30, 41, 59, 0.6);
-            border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-md); font-size: 0.95rem; color: white;
+            width: 100%; padding: 0.8rem 0.9rem; background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-md); font-size: 0.85rem; color: white;
             appearance: none; cursor: pointer; transition: all 0.3s ease;
         }
         select:hover { background: rgba(30, 41, 59, 0.9); }
@@ -262,7 +371,7 @@
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 0.5rem; }
 
         .btn {
-            width: 100%; padding: 1.1rem; border-radius: var(--radius-lg); font-size: 1rem; font-weight: 700;
+            width: 100%; padding: 0.9rem; border-radius: var(--radius-lg); font-size: 0.9rem; font-weight: 700;
             cursor: pointer; border: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 10px;
         }
@@ -307,7 +416,7 @@
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
-            z-index: 3000; display: none; align-items: center; justify-content: center;
+            z-index: 10500; display: none; align-items: center; justify-content: center;
             opacity: 0; transition: opacity 0.3s ease;
         }
         .modal-overlay.open { display: flex; opacity: 1; }
@@ -350,6 +459,177 @@
         }
         .news-list li i { color: var(--text-muted); font-size: 1.1rem; }
         .news-list li:hover i { color: white; }
+
+        /* --- SEAT SELECTION MODAL --- */
+        .seat-modal-content { max-width: 440px; }
+        .seat-flight-summary {
+            background: rgba(30, 41, 59, 0.5); border-radius: 14px; padding: 12px 16px;
+            margin-bottom: 1rem; font-size: 0.95rem; border: 1px solid rgba(255,255,255,0.06);
+        }
+        .seat-legend { display: flex; gap: 16px; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.9rem; flex-wrap: wrap; }
+        .seat-legend span { display: flex; align-items: center; gap: 7px; }
+        .seat-swatch {
+            display: inline-block; width: 15px; height: 13px; border-radius: 5px 5px 3px 3px; position: relative;
+        }
+        .seat-swatch::before {
+            content: ''; position: absolute; top: -3px; left: 2px; width: 9px; height: 4px; border-radius: 3px 3px 0 0;
+        }
+        .seat-swatch.free { background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.18); }
+        .seat-swatch.free::before { background: rgba(255,255,255,0.12); }
+        .seat-swatch.taken { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.4); }
+        .seat-swatch.taken::before { background: rgba(239,68,68,0.25); }
+        .seat-swatch.selected { background: var(--primary); box-shadow: 0 0 8px rgba(56,189,248,0.7); }
+        .seat-swatch.selected::before { background: #0369a1; }
+
+        /* Fusoliera: indicatori "Fronte" / "Retro" cabina */
+        .cabin-nose {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            color: var(--text-muted); font-size: 0.62rem; text-transform: uppercase; letter-spacing: 1.5px;
+            margin-bottom: 8px; font-weight: 700;
+        }
+        .cabin-nose::before, .cabin-nose::after { content: ''; height: 1px; flex: 1; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18)); }
+        .cabin-nose::after { background: linear-gradient(90deg, rgba(255,255,255,0.18), transparent); }
+        .cabin-nose i { color: var(--primary); }
+        .cabin-tail {
+            text-align: center; color: var(--text-muted); font-size: 0.62rem; text-transform: uppercase;
+            letter-spacing: 1.5px; margin-top: 10px; font-weight: 700; opacity: 0.6;
+        }
+
+        .seat-map-scroll {
+            max-height: 260px; overflow-y: auto; margin-bottom: 0.9rem; padding: 4px 6px 4px 2px;
+            background: linear-gradient(180deg, rgba(56,189,248,0.05), transparent 12%, transparent 88%, rgba(56,189,248,0.05));
+            border-radius: 14px; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .seat-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; padding: 2px 4px; border-radius: 8px; }
+        .seat-row.exit-row { background: rgba(245,158,11,0.07); }
+        .seat-row-num { width: 20px; flex-shrink: 0; font-size: 0.65rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; text-align: center; }
+        .seat-aisle { width: 14px; flex-shrink: 0; position: relative; }
+        .seat-aisle::after { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,0.08); }
+
+        .seat-cell {
+            flex: 1; aspect-ratio: 1; min-width: 26px; max-width: 34px; border-radius: 7px 7px 4px 4px;
+            border: 1px solid rgba(255,255,255,0.15); background: rgba(30,41,59,0.6); color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; font-weight: 700; cursor: pointer;
+            transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative;
+        }
+        .seat-cell::before {
+            content: ''; position: absolute; top: -4px; left: 15%; right: 15%; height: 5px;
+            border-radius: 4px 4px 0 0; background: rgba(255,255,255,0.08); transition: background 0.18s ease;
+        }
+        .seat-cell:hover:not(:disabled) { background: rgba(56,189,248,0.22); color: white; border-color: var(--primary); transform: translateY(-2px); }
+        .seat-cell:hover:not(:disabled)::before { background: rgba(56,189,248,0.4); }
+        .seat-cell.taken { background: rgba(239,68,68,0.12); color: rgba(239,68,68,0.55); border-color: rgba(239,68,68,0.3); cursor: not-allowed; }
+        .seat-cell.taken::before { background: rgba(239,68,68,0.2); }
+        .seat-cell.selected {
+            background: var(--primary); color: #0f172a; border-color: var(--primary);
+            box-shadow: 0 0 14px rgba(56,189,248,0.65); transform: translateY(-2px) scale(1.06);
+        }
+        .seat-cell.selected::before { background: #0369a1; }
+        @keyframes seatPop { 0% { transform: scale(0.4); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .seat-cell { animation: seatPop 0.25s ease backwards; }
+
+        .seat-selected-readout {
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.25); border-radius: 12px;
+            padding: 0 14px; font-size: 0.85rem; color: var(--text-muted);
+            opacity: 0; max-height: 0; overflow: hidden; transition: all 0.3s ease; margin-bottom: 0;
+        }
+        .seat-selected-readout.visible { opacity: 1; max-height: 60px; margin-bottom: 0.9rem; padding: 10px 14px; }
+        .seat-selected-readout b { color: var(--primary); font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; }
+
+        /* --- BOARDING PASS TICKET MODAL --- */
+        .ticket-modal-content {
+            max-width: 480px; background: transparent; box-shadow: none; padding: 0; border: none;
+            overflow: visible; text-align: center;
+        }
+        .ticket-modal-content::before { display: none; }
+
+        .boarding-pass {
+            --bp-primary: #0369a1; --bp-accent: #38bdf8; --bp-stub-bg: #1e293b; --bp-stub-bg2: #0f172a;
+            position: relative; display: flex; background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border-radius: 20px; overflow: visible; box-shadow: 0 25px 80px rgba(0,0,0,0.7);
+            color: #0f172a; font-family: 'Inter', sans-serif; min-height: 200px;
+            transition: box-shadow 0.4s ease;
+        }
+        .bp-main {
+            flex: 1; padding: 1.7rem 1.5rem; text-align: left; position: relative;
+            border-radius: 20px 0 0 20px; overflow: hidden;
+            border-top: 5px solid var(--bp-primary);
+            border-right: 2px dashed rgba(15,23,42,0.25);
+            transition: clip-path 0.55s cubic-bezier(.36,.66,.32,1);
+        }
+        .bp-header {
+            display: flex; align-items: center; gap: 10px; color: var(--bp-primary); font-weight: 800;
+            font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1.2rem;
+        }
+        .bp-header i { color: var(--bp-accent); }
+        .bp-route { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.3rem; gap: 10px; }
+        .bp-city { display: flex; flex-direction: column; }
+        .bp-code { font-size: 2rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; line-height: 1; color: var(--bp-primary); }
+        .bp-cityname { font-size: 0.68rem; color: #64748b; margin-top: 4px; max-width: 100px; }
+        .bp-plane-icon { color: var(--bp-accent); font-size: 1.2rem; opacity: 0.8; flex-shrink: 0; }
+        .bp-details { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.9rem 0.6rem; }
+        .bp-details div label { display: block; font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8; margin-bottom: 2px; }
+        .bp-details div span { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.82rem; color: #0f172a; }
+
+        .bp-stub {
+            width: 104px; flex-shrink: 0; background: linear-gradient(160deg, var(--bp-stub-bg), var(--bp-stub-bg2));
+            border-radius: 0 20px 20px 0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 12px; padding: 1rem 0.5rem; position: relative;
+            transition: transform 0.6s cubic-bezier(.36,.66,.32,1), box-shadow 0.6s ease;
+            will-change: transform;
+        }
+        .bp-barcode { width: 24px; height: 84px; background: repeating-linear-gradient(90deg, #f8fafc 0 2px, transparent 2px 4px); }
+        .bp-stub-seat { color: #f8fafc; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 1.05rem; }
+        .bp-stub::before, .bp-stub::after {
+            content: ''; position: absolute; left: -9px; width: 16px; height: 16px;
+            background: var(--bg-dark); border-radius: 50%; z-index: 2;
+        }
+        .bp-stub::before { top: -8px; }
+        .bp-stub::after { bottom: -8px; }
+
+        .bp-main *, .bp-stub * { opacity: 0; transform: translateY(6px); transition: all 0.5s ease; }
+        .boarding-pass.filled .bp-main *, .boarding-pass.filled .bp-stub * { opacity: 1; transform: translateY(0); }
+        .boarding-pass.filled .bp-details div:nth-child(1) { transition-delay: 0.05s; }
+        .boarding-pass.filled .bp-details div:nth-child(2) { transition-delay: 0.10s; }
+        .boarding-pass.filled .bp-details div:nth-child(3) { transition-delay: 0.15s; }
+        .boarding-pass.filled .bp-details div:nth-child(4) { transition-delay: 0.20s; }
+        .boarding-pass.filled .bp-details div:nth-child(5) { transition-delay: 0.25s; }
+        .boarding-pass.filled .bp-details div:nth-child(6) { transition-delay: 0.30s; }
+
+        /* Strappo: quando si applica .torn, ENTRAMBI i pezzi ricevono un bordo frastagliato
+           (clip-path a zig-zag) e lo stub si stacca fisicamente dal biglietto */
+        .boarding-pass.torn .bp-main {
+            clip-path: polygon(0% 0%, 100% 0.00%, calc(100% - 3px) 7.14%, calc(100% - 7px) 14.29%, calc(100% - 4px) 21.43%, calc(100% - 8px) 28.57%, calc(100% - 2px) 35.71%, calc(100% - 6px) 42.86%, calc(100% - 9px) 50.00%, calc(100% - 3px) 57.14%, calc(100% - 7px) 64.29%, calc(100% - 5px) 71.43%, calc(100% - 8px) 78.57%, calc(100% - 2px) 85.71%, calc(100% - 5px) 92.86%, 100% 100.00%, 0% 100%);
+            box-shadow: 8px 0 18px -6px rgba(0,0,0,0.35) inset;
+            transform: translateX(-3px);
+        }
+        .boarding-pass.torn .bp-stub {
+            clip-path: polygon(100% 0%, 0% 0.00%, calc(0% + 3px) 7.14%, calc(0% + 7px) 14.29%, calc(0% + 4px) 21.43%, calc(0% + 8px) 28.57%, calc(0% + 2px) 35.71%, calc(0% + 6px) 42.86%, calc(0% + 9px) 50.00%, calc(0% + 3px) 57.14%, calc(0% + 7px) 64.29%, calc(0% + 5px) 71.43%, calc(0% + 8px) 78.57%, calc(0% + 2px) 85.71%, calc(0% + 5px) 92.86%, 0% 100.00%, 100% 100%);
+            transform: translateX(22px) translateY(6px) rotate(6deg);
+            box-shadow: -6px 10px 24px rgba(0,0,0,0.55);
+        }
+
+        #bp-continue-btn { margin: 1.6rem auto 0 auto; max-width: 280px; }
+
+        @media (max-width: 480px) {
+            .boarding-pass { flex-direction: column; }
+            .bp-main { border-radius: 20px 20px 0 0; border-right: none; border-bottom: 2px dashed rgba(15,23,42,0.25); }
+            .bp-stub { flex-direction: row; width: 100%; border-radius: 0 0 20px 20px; }
+            .bp-barcode { width: 84px; height: 24px; background: repeating-linear-gradient(0deg, #f8fafc 0 2px, transparent 2px 4px); }
+            .bp-stub::before, .bp-stub::after { left: 50%; top: -8px; transform: translateX(-50%); }
+            .bp-stub::after { bottom: -8px; top: auto; }
+            .boarding-pass.torn .bp-main {
+                clip-path: polygon(0% 0%, 100% 0%, 100.00% calc(100% - 0px), 92.86% calc(100% - 5px), 85.71% calc(100% - 2px), 78.57% calc(100% - 8px), 71.43% calc(100% - 5px), 64.29% calc(100% - 7px), 57.14% calc(100% - 3px), 50.00% calc(100% - 9px), 42.86% calc(100% - 6px), 35.71% calc(100% - 2px), 28.57% calc(100% - 8px), 21.43% calc(100% - 4px), 14.29% calc(100% - 7px), 7.14% calc(100% - 3px), 0.00% calc(100% - 0px), 0% 100%);
+                transform: translateY(-3px);
+            }
+            .boarding-pass.torn .bp-stub {
+                clip-path: polygon(0.00% 0%, 7.14% calc(0% + 3px), 14.29% calc(0% + 7px), 21.43% calc(0% + 4px), 28.57% calc(0% + 8px), 35.71% calc(0% + 2px), 42.86% calc(0% + 6px), 50.00% calc(0% + 9px), 57.14% calc(0% + 3px), 64.29% calc(0% + 7px), 71.43% calc(0% + 5px), 78.57% calc(0% + 8px), 85.71% calc(0% + 2px), 92.86% calc(0% + 5px), 100.00% 0%, 100% 100%, 0% 100%);
+                transform: translateY(22px) translateX(6px) rotate(-2deg);
+                box-shadow: 10px -6px 24px rgba(0,0,0,0.55);
+            }
+        }
 
         /* --- MOBILE ADJUSTMENTS (ORDINE E PULIZIA) --- */
         @media (max-width: 768px) {
@@ -427,6 +707,12 @@
             .menu-title { font-size: 2.2rem; }
             .menu-icon { font-size: 3rem; margin-bottom: 10px; }
             .menu-subtitle { font-size: 0.9rem; margin-bottom: 30px; }
+
+            /* 7. Settings & audio controls */
+            .menu-secondary-actions { flex-direction: column; align-items: center; margin-top: 14px; }
+            .menu-btn-secondary { width: 100%; max-width: 240px; justify-content: center; }
+            .icon-btn { width: 36px; height: 36px; font-size: 0.85rem; }
+            .modal-content { padding: 1.6rem; }
         }
     </style>
 </head>
@@ -434,13 +720,28 @@
     
     <!-- MENU PRINCIPALE -->
     <div id="main-menu">
+        <div id="menu-bg-map"></div>
+        <div id="menu-bg-overlay"></div>
         <div class="menu-content">
             <i class="fa-solid fa-plane-up menu-icon"></i>
             <h1 class="menu-title">RelaxFlightX</h1>
-            <p class="menu-subtitle">The Most Realistic Flight Simulation</p>
+            <p class="menu-subtitle" data-translate="menu_subtitle">The Most Realistic Flight Simulation</p>
             <button class="menu-btn" onclick="enterGame()">
-                <i class="fa-solid fa-play"></i> START
+                <i class="fa-solid fa-play"></i> <span data-translate="menu_start">START</span>
             </button>
+            <div class="menu-secondary-actions">
+                <button class="menu-btn-secondary" onclick="openSettingsModal()">
+                    <i class="fa-solid fa-gear"></i> <span data-translate="settings">Impostazioni</span>
+                </button>
+                <button class="menu-btn-secondary" onclick="toggleNewsModal()">
+                    <i class="fa-solid fa-newspaper"></i> <span data-translate="news_btn">News</span>
+                </button>
+                <button class="menu-btn-secondary" onclick="toggleFullscreen()" title="Schermo Intero">
+                    <i class="fa-solid fa-expand" id="fullscreen-icon-menu"></i> <span id="fullscreen-text-menu" data-translate="settings_fullscreen">Schermo Intero</span>
+                </button>
+            </div>
+            <div class="menu-version">RelaxFlightX v5.7</div>
+            <div class="menu-map-credit">Map data © OpenStreetMap contributors, © CARTO</div>
         </div>
     </div>
 
@@ -466,10 +767,125 @@
         </div>
     </div>
 
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeSettingsModal()">&times;</button>
+            <div class="modal-title">
+                <i class="fa-solid fa-gear"></i> <span data-translate="settings">Impostazioni</span>
+            </div>
+
+            <div class="settings-section">
+                <div class="settings-section-title"><i class="fa-solid fa-globe"></i> <span data-translate="settings_language">Lingua</span></div>
+                <div class="lang-toggle-row">
+                    <div class="lang-option" id="lang-opt-it" onclick="setLanguage('it')">🇮🇹 Italiano</div>
+                    <div class="lang-option" id="lang-opt-en" onclick="setLanguage('en')">🇬🇧 English</div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <div class="settings-section-title"><i class="fa-solid fa-volume-high"></i> <span data-translate="settings_audio">Audio</span></div>
+
+                <div class="mute-all-row" style="margin-bottom: 1rem;">
+                    <span data-translate="settings_mute_all">Disattiva tutti i suoni</span>
+                    <label class="switch-toggle">
+                        <input type="checkbox" id="mute-all-toggle" onchange="setMuted(this.checked)">
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+
+                <div class="volume-row">
+                    <div class="icon-btn" style="cursor:default;"><i class="fa-solid fa-bell"></i></div>
+                    <div class="volume-row-label">
+                        <div class="vr-title"><span data-translate="settings_sfx">Effetti sonori</span> <span class="vr-value" id="sfx-vol-label">80%</span></div>
+                        <input type="range" id="sfx-volume" min="0" max="100" value="80" oninput="setSfxVolume(this.value)">
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-btn-row">
+                <button class="btn btn-outline" id="settings-back-to-menu" onclick="backToMainMenu()" style="display:none;">
+                    <i class="fa-solid fa-house"></i> <span data-translate="settings_back_menu">Torna al Menu</span>
+                </button>
+                <button class="btn btn-primary" onclick="closeSettingsModal()">
+                    <i class="fa-solid fa-check"></i> <span data-translate="settings_close">Chiudi</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="seat-modal" class="modal-overlay">
+        <div class="modal-content seat-modal-content">
+            <button class="close-modal" onclick="closeSeatModal()">&times;</button>
+            <div class="modal-title">
+                <i class="fa-solid fa-chair"></i> <span data-translate="seat_title">Seleziona il tuo Posto</span>
+            </div>
+            <div class="seat-flight-summary" id="seat-flight-summary"></div>
+            <div class="seat-legend">
+                <span><i class="seat-swatch free"></i><span data-translate="seat_free">Libero</span></span>
+                <span><i class="seat-swatch taken"></i><span data-translate="seat_taken">Occupato</span></span>
+                <span><i class="seat-swatch selected"></i><span data-translate="seat_selected">Selezionato</span></span>
+            </div>
+            <div class="seat-selected-readout" id="seat-selected-readout">
+                <span><i class="fa-solid fa-chair" style="color:var(--primary); margin-right:6px;"></i><span data-translate="seat_selected">Selezionato</span></span>
+                <b id="seat-selected-readout-val">—</b>
+            </div>
+            <div class="cabin-nose"><i class="fa-solid fa-plane-up"></i> <span data-translate="seat_front">Fronte Cabina</span></div>
+            <div class="seat-map-scroll"><div id="seat-grid" class="seat-grid"></div></div>
+            <div class="cabin-tail" data-translate="seat_rear">Retro Cabina</div>
+            <button class="btn btn-primary" id="confirm-seat-btn" onclick="confirmSeatSelection()" disabled>
+                <i class="fa-solid fa-ticket"></i> <span data-translate="seat_confirm">Conferma e Imbarca</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="boarding-pass-modal" class="modal-overlay">
+        <div class="modal-content ticket-modal-content">
+            <div class="boarding-pass" id="boarding-pass">
+                <div class="bp-main">
+                    <div class="bp-header">
+                        <i class="fa-solid fa-plane-up"></i>
+                        <span class="bp-airline" id="bp-airline">—</span>
+                    </div>
+                    <div class="bp-route">
+                        <div class="bp-city">
+                            <span class="bp-code" id="bp-from-code">—</span>
+                            <span class="bp-cityname" id="bp-from-name">—</span>
+                        </div>
+                        <i class="fa-solid fa-plane bp-plane-icon"></i>
+                        <div class="bp-city" style="text-align:right;">
+                            <span class="bp-code" id="bp-to-code">—</span>
+                            <span class="bp-cityname" id="bp-to-name">—</span>
+                        </div>
+                    </div>
+                    <div class="bp-details">
+                        <div><label data-translate="bp_flight">Volo</label><span id="bp-flightno">—</span></div>
+                        <div><label data-translate="bp_aircraft">Aereo</label><span id="bp-aircraft">—</span></div>
+                        <div><label data-translate="bp_gate">Gate</label><span id="bp-gate">—</span></div>
+                        <div><label data-translate="bp_seat">Posto</label><span id="bp-seat">—</span></div>
+                        <div><label data-translate="bp_date">Data</label><span id="bp-date">—</span></div>
+                        <div><label data-translate="bp_boarding">Imbarco</label><span id="bp-boarding">—</span></div>
+                    </div>
+                </div>
+                <div class="bp-stub" id="bp-stub">
+                    <div class="bp-barcode"></div>
+                    <div class="bp-stub-seat" id="bp-stub-seat">—</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" id="bp-continue-btn" onclick="closeBoardingPass()" style="display:none;">
+                <i class="fa-solid fa-paper-plane"></i> <span data-translate="bp_continue">Decolla!</span>
+            </button>
+        </div>
+    </div>
+
     <div class="settings-panel game-ui">
-        <button class="lang-btn" onclick="toggleLanguage()">
-            <i class="fa-solid fa-globe"></i> <span id="lang-text">IT</span>
-        </button>
+        <div style="display:flex; gap:8px;">
+            <button class="icon-btn spin-hover" onclick="openSettingsModal()" title="Impostazioni">
+                <i class="fa-solid fa-gear"></i>
+            </button>
+            <button class="lang-btn" id="fullscreen-btn" onclick="toggleFullscreen()" title="Schermo Intero">
+                <i class="fa-solid fa-expand" id="fullscreen-icon"></i> <span id="fullscreen-text">Schermo Intero</span>
+            </button>
+        </div>
         <div class="credits">Game designed by Minno</div>
     </div>
 
@@ -618,7 +1034,7 @@
                 </div>
             </div>
 
-            <button class="btn btn-primary" id="fly-btn" onclick="startFlight()">
+            <button class="btn btn-primary" id="fly-btn" onclick="openSeatSelection()">
                 <i class="fa-solid fa-paper-plane"></i> <span id="fly-btn-text" data-translate="takeoff">Decolla</span>
             </button>
 
@@ -651,8 +1067,16 @@
                 ac_g7500: "Bombardier Global 7500 (Privato)", ac_f22: "F-22 Raptor (Caccia Militare)", ac_an225: "Antonov An-225 \"Mriya\" (Cargo)",
                 ac_spit: "Supermarine Spitfire (Storico)", ac_pc12: "Pilatus PC-12 (Turboelica)",
                 pause: "Pausa", resume: "Riprendi", map_view: "Mappa", sat_view: "Satellite",
-                news_title: "Novità v5.6", news_airlines: "Compagnie Aeree", news_liveries: "Nuove livree",
-                news_rotation: "Fix Rotazione", news_fixes: "Bug Fixes", news_world: "Mondo Espanso", news_expansion: "+130 Aeroporti internazionali"
+                news_title: "Novità v5.7", news_airlines: "Compagnie Aeree", news_liveries: "Nuove livree",
+                news_rotation: "Fix Rotazione", news_fixes: "Bug Fixes", news_world: "Mondo Espanso", news_expansion: "+130 Aeroporti internazionali",
+                menu_subtitle: "La Simulazione di Volo Più Rilassante", menu_start: "GIOCA", news_btn: "News",
+                settings: "Impostazioni", settings_language: "Lingua", settings_audio: "Audio",
+                settings_mute_all: "Disattiva tutti i suoni", settings_music: "Musica di sottofondo", settings_sfx: "Effetti sonori",
+                settings_back_menu: "Torna al Menu", settings_close: "Chiudi", settings_fullscreen: "Schermo Intero", status_paused: "IN PAUSA",
+                seat_title: "Seleziona il tuo Posto", seat_free: "Libero", seat_taken: "Occupato", seat_selected: "Selezionato",
+                seat_front: "Fronte Cabina", seat_rear: "Retro Cabina",
+                seat_confirm: "Conferma e Imbarca", bp_flight: "Volo", bp_aircraft: "Aereo", bp_gate: "Gate",
+                bp_seat: "Posto", bp_date: "Data", bp_boarding: "Imbarco", bp_stamp: "IMBARCATO", bp_continue: "Decolla!"
             },
             en: {
                 local_time: "Local Time", weather_dest: "Weather", flight_data: "Flight Data",
@@ -669,17 +1093,57 @@
                 ac_g7500: "Bombardier Global 7500 (Private)", ac_f22: "F-22 Raptor (Fighter Jet)", ac_an225: "Antonov An-225 \"Mriya\" (Cargo)",
                 ac_spit: "Supermarine Spitfire (Historic)", ac_pc12: "Pilatus PC-12 (Turboprop)",
                 pause: "Pause", resume: "Resume", map_view: "Map", sat_view: "Satellite",
-                news_title: "News v5.6", news_airlines: "New Airlines", news_liveries: "New liveries",
-                news_rotation: "Rotation Fix", news_fixes: "Bug Fixes", news_world: "World Expanded", news_expansion: "+130 International Airports"
+                news_title: "News v5.7", news_airlines: "New Airlines", news_liveries: "New liveries",
+                news_rotation: "Rotation Fix", news_fixes: "Bug Fixes", news_world: "World Expanded", news_expansion: "+130 International Airports",
+                menu_subtitle: "The Most Relaxing Flight Simulation", menu_start: "PLAY", news_btn: "News",
+                settings: "Settings", settings_language: "Language", settings_audio: "Audio",
+                settings_mute_all: "Mute all sounds", settings_music: "Background music", settings_sfx: "Sound effects",
+                settings_back_menu: "Back to Menu", settings_close: "Close", settings_fullscreen: "Fullscreen", status_paused: "PAUSED",
+                seat_title: "Choose your Seat", seat_free: "Free", seat_taken: "Taken", seat_selected: "Selected",
+                seat_front: "Cabin Front", seat_rear: "Cabin Rear",
+                seat_confirm: "Confirm and Board", bp_flight: "Flight", bp_aircraft: "Aircraft", bp_gate: "Gate",
+                bp_seat: "Seat", bp_date: "Date", bp_boarding: "Boarding", bp_stamp: "BOARDED", bp_continue: "Take Off!"
             }
         };
 
         function toggleLanguage() {
-            currentLang = currentLang === 'it' ? 'en' : 'it';
-            document.getElementById('lang-text').innerText = currentLang.toUpperCase();
+            setLanguage(currentLang === 'it' ? 'en' : 'it');
+        }
+        function setLanguage(lang) {
+            if(lang !== 'it' && lang !== 'en') return;
+            currentLang = lang;
+            localStorage.setItem('rfx_lang', currentLang);
             updateInterfaceText();
             updateAirportNames(); // NEW: Update airport names when language changes
+            updateFullscreenIcon();
         }
+
+        // --- FULLSCREEN TOGGLE (bottom-left button, replaces old quick language switch) ---
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                const el = document.documentElement;
+                const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+                if (req) req.call(el).catch(() => {});
+            } else {
+                const exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+                if (exit) exit.call(document).catch(() => {});
+            }
+        }
+        function updateFullscreenIcon() {
+            const isFs = !!document.fullscreenElement;
+            const label = isFs
+                ? (currentLang === 'it' ? 'Esci' : 'Exit')
+                : (currentLang === 'it' ? 'Schermo Intero' : 'Fullscreen');
+            [['fullscreen-icon', 'fullscreen-text'], ['fullscreen-icon-menu', 'fullscreen-text-menu']].forEach(([iconId, textId]) => {
+                const icon = document.getElementById(iconId);
+                const text = document.getElementById(textId);
+                if (!icon) return;
+                icon.className = isFs ? 'fa-solid fa-compress' : 'fa-solid fa-expand';
+                if (text) text.innerText = label;
+            });
+        }
+        document.addEventListener('fullscreenchange', updateFullscreenIcon);
+        document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
 
         function updateInterfaceText() {
             const t = translations[currentLang];
@@ -711,6 +1175,9 @@
             
             const mapBtn = document.getElementById('map-btn');
             mapBtn.querySelector('span').innerText = currentMapMode === 'sat' ? t.map_view : t.sat_view;
+
+            document.getElementById('lang-opt-it').classList.toggle('active', currentLang === 'it');
+            document.getElementById('lang-opt-en').classList.toggle('active', currentLang === 'en');
         }
 
         // NEW: Function to handle airport name changes dynamically
@@ -755,8 +1222,325 @@
             });
         }
 
+        // =====================================================
+        // --- SOUND MANAGER (Web Audio API, 100% procedurale) ---
+        // =====================================================
+        const SoundManager = (() => {
+            let ctx = null;
+            let musicGain, sfxGain, masterGain;
+            let musicNodes = [];
+            let musicTimer = null;
+            let musicPlaying = false;
+            let switchPlayedThisFlight = false;
+            let landingChimePlayed = false;
+
+            let musicVol = parseFloat(localStorage.getItem('rfx_musicVol'));
+            if (isNaN(musicVol)) musicVol = 0.7;
+            let sfxVol = parseFloat(localStorage.getItem('rfx_sfxVol'));
+            if (isNaN(sfxVol)) sfxVol = 0.8;
+            let muted = localStorage.getItem('rfx_muted') === 'true';
+
+            function ensureCtx() {
+                if (ctx) return;
+                ctx = new (window.AudioContext || window.webkitAudioContext)();
+                masterGain = ctx.createGain();
+                masterGain.gain.value = muted ? 0 : 1;
+                masterGain.connect(ctx.destination);
+
+                musicGain = ctx.createGain();
+                musicGain.gain.value = musicVol;
+                musicGain.connect(masterGain);
+
+                sfxGain = ctx.createGain();
+                sfxGain.gain.value = sfxVol;
+                sfxGain.connect(masterGain);
+            }
+
+            function resume() {
+                ensureCtx();
+                if (ctx.state === 'suspended') ctx.resume();
+            }
+
+            // --- Musica di sottofondo: arpeggio soft + basso caldo, tempo più mosso ---
+            const CHORDS = [
+                [261.63, 329.63, 392.00, 493.88], // Cmaj7
+                [293.66, 349.23, 440.00, 523.25], // Dm7
+                [220.00, 261.63, 329.63, 392.00], // Am7
+                [196.00, 246.94, 293.66, 349.23]  // Gadd9
+            ];
+            let chordIndex = 0;
+
+            function playBassPad(freq, startTime, duration) {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq / 2;
+                const filt = ctx.createBiquadFilter();
+                filt.type = 'lowpass';
+                filt.frequency.value = 900;
+                osc.connect(filt);
+                filt.connect(gain);
+                gain.connect(musicGain);
+                gain.gain.setValueAtTime(0, startTime);
+                gain.gain.linearRampToValueAtTime(0.05, startTime + duration * 0.3);
+                gain.gain.linearRampToValueAtTime(0, startTime + duration);
+                osc.start(startTime);
+                osc.stop(startTime + duration + 0.1);
+                musicNodes.push(osc);
+            }
+
+            function playPluck(freq, startTime, duration, gainPeak) {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.value = freq;
+                const filt = ctx.createBiquadFilter();
+                filt.type = 'lowpass';
+                filt.frequency.value = 2400;
+                osc.connect(filt);
+                filt.connect(gain);
+                gain.connect(musicGain);
+                gain.gain.setValueAtTime(0, startTime);
+                gain.gain.linearRampToValueAtTime(Math.max(gainPeak, 0.012), startTime + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+                osc.start(startTime);
+                osc.stop(startTime + duration + 0.05);
+                musicNodes.push(osc);
+            }
+
+            function playPadChord(freqs, startTime, duration) {
+                // Basso caldo sostenuto
+                playBassPad(freqs[0], startTime, duration);
+                // Arpeggio soft che sale e scende sull'accordo: più ritmico e meno "lento"
+                const steps = [freqs[0] * 2, freqs[1] * 2, freqs[2] * 2, freqs[3] * 2, freqs[2] * 2, freqs[1] * 2];
+                const stepDur = duration / steps.length;
+                steps.forEach((f, i) => {
+                    playPluck(f, startTime + i * stepDur, stepDur * 1.7, 0.055 - i * 0.003);
+                });
+            }
+
+            function scheduleMusicLoop() {
+                if (!musicPlaying) return;
+                const chordDuration = 3.4; // tempo più mosso rispetto a prima (era 6.5s)
+                playPadChord(CHORDS[chordIndex % CHORDS.length], ctx.currentTime + 0.05, chordDuration);
+                chordIndex++;
+                musicTimer = setTimeout(scheduleMusicLoop, chordDuration * 1000 * 0.95);
+            }
+
+            function startMusic() {
+                resume();
+                if (musicPlaying) return;
+                musicPlaying = true;
+                chordIndex = 0;
+                scheduleMusicLoop();
+            }
+
+            function stopMusic() {
+                musicPlaying = false;
+                if (musicTimer) clearTimeout(musicTimer);
+                musicNodes.forEach(n => { try { n.stop(); } catch(e){} });
+                musicNodes = [];
+            }
+
+            // --- SFX generici ---
+            function tone(freq, duration, type, startGain, destGain, glideTo) {
+                resume();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = type || 'sine';
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                if (glideTo) osc.frequency.exponentialRampToValueAtTime(glideTo, ctx.currentTime + duration);
+                gain.gain.setValueAtTime(startGain, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(destGain || sfxGain);
+                osc.start();
+                osc.stop(ctx.currentTime + duration + 0.05);
+            }
+
+            function noiseBurst(duration, filterFreqStart, filterFreqEnd, gainPeak) {
+                resume();
+                const bufferSize = ctx.sampleRate * duration;
+                const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+                const noise = ctx.createBufferSource();
+                noise.buffer = buffer;
+                const filt = ctx.createBiquadFilter();
+                filt.type = 'bandpass';
+                filt.frequency.setValueAtTime(filterFreqStart, ctx.currentTime);
+                filt.frequency.exponentialRampToValueAtTime(filterFreqEnd, ctx.currentTime + duration);
+                filt.Q.value = 0.8;
+
+                const gain = ctx.createGain();
+                gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(gainPeak, ctx.currentTime + duration * 0.3);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+
+                noise.connect(filt);
+                filt.connect(gain);
+                gain.connect(sfxGain);
+                noise.start();
+                noise.stop(ctx.currentTime + duration + 0.05);
+            }
+
+            function playClick() { tone(650, 0.07, 'triangle', 0.18, sfxGain, 380); }
+            function playHover() { tone(1100, 0.035, 'sine', 0.05, sfxGain, 1300); }
+
+            function playTakeoff() {
+                resume();
+                switchPlayedThisFlight = false;
+                landingChimePlayed = false;
+                // Solo fruscio d'aria (whoosh), niente tono/motore robotico
+                noiseBurst(2.4, 250, 1300, 0.15);
+            }
+
+            function chimeTone(freq, delay, duration, peak) {
+                const startTime = ctx.currentTime + delay;
+                const osc = ctx.createOscillator();
+                const overtone = ctx.createOscillator();
+                const gain = ctx.createGain();
+                const overGain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                overtone.type = 'sine';
+                overtone.frequency.value = freq * 2.01; // leggera disarmonia per timbro "campana"
+                overtone.connect(overGain);
+                overGain.gain.setValueAtTime(peak * 0.35, startTime);
+                overGain.gain.exponentialRampToValueAtTime(0.0005, startTime + duration * 0.5);
+                overGain.connect(gain);
+                osc.connect(gain);
+                gain.connect(sfxGain);
+                gain.gain.setValueAtTime(0.0001, startTime);
+                gain.gain.linearRampToValueAtTime(peak, startTime + 0.015);
+                gain.gain.exponentialRampToValueAtTime(0.0005, startTime + duration);
+                osc.start(startTime); osc.stop(startTime + duration + 0.05);
+                overtone.start(startTime); overtone.stop(startTime + duration + 0.05);
+            }
+
+            function playCruiseSwitch() {
+                if (switchPlayedThisFlight) return;
+                switchPlayedThisFlight = true;
+                resume();
+                // "Ding-dong" come il segnale delle cinture in un aereo vero (decollo -> crociera)
+                chimeTone(1046.50, 0, 0.55, 0.22);    // ding (C6)
+                chimeTone(783.99, 0.30, 0.75, 0.20);  // dong (G5)
+            }
+
+            function playLandingChime() {
+                if (landingChimePlayed) return;
+                landingChimePlayed = true;
+                resume();
+                // Stesso "ding-dong" usato per crociera -> decollo, riusato per crociera -> atterraggio
+                chimeTone(1046.50, 0, 0.55, 0.22);    // ding (C6)
+                chimeTone(783.99, 0.30, 0.75, 0.20);  // dong (G5)
+            }
+
+            function playArrival() {
+                resume();
+                // Stesso fruscio d'aria (whoosh) usato al decollo
+                noiseBurst(2.4, 250, 1300, 0.15);
+            }
+
+            function playTear() {
+                resume();
+                // Suono di carta che si strappa: rumore filtrato in due raffiche irregolari
+                noiseBurst(0.22, 3200, 900, 0.16);
+                setTimeout(() => noiseBurst(0.28, 2400, 500, 0.14), 90);
+                setTimeout(() => noiseBurst(0.16, 1600, 350, 0.10), 260);
+            }
+
+            function setMusicVolume(v) { musicVol = v; if (musicGain) musicGain.gain.value = v; localStorage.setItem('rfx_musicVol', v); }
+            function setSfxVolume(v) { sfxVol = v; if (sfxGain) sfxGain.gain.value = v; localStorage.setItem('rfx_sfxVol', v); }
+            function setMuted(m) {
+                muted = m;
+                if (masterGain) masterGain.gain.value = m ? 0 : 1;
+                localStorage.setItem('rfx_muted', m);
+            }
+            function getState() { return { musicVol, sfxVol, muted }; }
+
+            return {
+                resume, startMusic, stopMusic, playClick, playHover, playTakeoff,
+                playCruiseSwitch, playLandingChime, playArrival, playTear, setMusicVolume, setSfxVolume, setMuted, getState
+            };
+        })();
+
+        function openSettingsModal() {
+            SoundManager.resume();
+            document.getElementById('settings-modal').classList.add('open');
+            document.getElementById('settings-back-to-menu').style.display =
+                document.getElementById('main-menu').classList.contains('hidden') ? 'flex' : 'none';
+        }
+        function closeSettingsModal() { document.getElementById('settings-modal').classList.remove('open'); }
+
+        function setSfxVolume(val) {
+            const v = val / 100;
+            SoundManager.setSfxVolume(v);
+            document.getElementById('sfx-vol-label').innerText = val + '%';
+            SoundManager.playClick();
+        }
+        function setMuted(isMuted) {
+            SoundManager.setMuted(isMuted);
+            updateQuickMuteIcon();
+        }
+        function toggleQuickMute() {
+            const nowMuted = !SoundManager.getState().muted;
+            SoundManager.setMuted(nowMuted);
+            document.getElementById('mute-all-toggle').checked = nowMuted;
+            updateQuickMuteIcon();
+        }
+        function updateQuickMuteIcon() {
+            const btn = document.getElementById('quick-mute-btn');
+            if (!btn) return;
+            const muted = SoundManager.getState().muted;
+            btn.innerHTML = `<i class="fa-solid ${muted ? 'fa-volume-xmark' : 'fa-volume-high'}"></i>`;
+            btn.classList.toggle('muted', muted);
+        }
+
+        function backToMainMenu() {
+            closeSettingsModal();
+            if (flightInterval) cancelFlight();
+            document.querySelectorAll('.game-ui').forEach(el => el.classList.remove('visible'));
+            const menu = document.getElementById('main-menu');
+            menu.classList.remove('hidden');
+            setTimeout(() => menu.classList.add('visible'), 50);
+        }
+
+        function attachUISounds() {
+            document.querySelectorAll('button, select, .lang-option, .modal-content .close-modal').forEach(el => {
+                if (el.dataset.soundBound) return;
+                el.dataset.soundBound = '1';
+                el.addEventListener('mouseenter', () => SoundManager.playHover());
+                el.addEventListener('click', () => SoundManager.playClick());
+            });
+        }
+
         window.onload = function() {
+            // --- Carica impostazioni salvate ---
+            const savedLang = localStorage.getItem('rfx_lang');
+            if (savedLang) setLanguage(savedLang); else updateInterfaceText();
+
+            const st = SoundManager.getState();
+            document.getElementById('sfx-volume').value = Math.round(st.sfxVol * 100);
+            document.getElementById('sfx-vol-label').innerText = Math.round(st.sfxVol * 100) + '%';
+            document.getElementById('mute-all-toggle').checked = st.muted;
+            updateQuickMuteIcon();
+            updateFullscreenIcon();
+
+            attachUISounds();
+
+            // L'audio richiede un'interazione dell'utente per partire (policy dei browser)
+            const startAudioOnce = () => {
+                SoundManager.resume();
+                document.removeEventListener('pointerdown', startAudioOnce);
+                document.removeEventListener('keydown', startAudioOnce);
+            };
+            document.addEventListener('pointerdown', startAudioOnce);
+            document.addEventListener('keydown', startAudioOnce);
+
             setTimeout(() => { document.getElementById('main-menu').classList.add('visible'); }, 100);
+            initBgMap();
             
             // --- MOBILE SIDEBAR SWIPE LOGIC ---
             const sidebar = document.getElementById('control-sidebar');
@@ -803,11 +1587,58 @@
                 }
             });
         };
+        // --- ANIMATED WORLD MAP BEHIND THE MAIN MENU ---
+        let bgMap = null, bgMapPanTimer = null, bgMapResizeTimer = null;
+
+        // Calcola lo zoom in base al tipo di schermo: su schermi larghi/desktop
+        // la mappa viene "stretchata" (più zoom) per coprire bene lo spazio orizzontale,
+        // su schermi stretti/mobile resta più compatta.
+        function computeBgMapZoom() {
+            const w = window.innerWidth, h = window.innerHeight;
+            const aspect = w / h;
+            if (aspect >= 2.2) return 3.6;   // ultra-wide desktop
+            if (aspect >= 1.7) return 3.1;   // desktop 16:9 standard
+            if (aspect >= 1.3) return 2.7;   // desktop/tablet più quadrato
+            if (aspect >= 0.85) return 2.3;  // tablet portrait
+            return 2.0;                      // telefono portrait (stretto)
+        }
+
+        function initBgMap() {
+            if (bgMap) return;
+            try {
+                bgMap = L.map('menu-bg-map', {
+                    center: [24, 8], zoom: computeBgMapZoom(), minZoom: 2, maxZoom: 6,
+                    zoomControl: false, attributionControl: true,
+                    dragging: false, scrollWheelZoom: false, doubleClickZoom: false,
+                    boxZoom: false, keyboard: false, touchZoom: false, tap: false
+                });
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    subdomains: 'abcd', maxZoom: 6
+                }).addTo(bgMap);
+                setTimeout(() => bgMap && bgMap.invalidateSize(), 300);
+                if (bgMapPanTimer) clearInterval(bgMapPanTimer);
+                bgMapPanTimer = setInterval(() => {
+                    if (bgMap) bgMap.panBy([0.35, 0], { animate: false });
+                }, 60);
+                window.addEventListener('resize', () => {
+                    if (!bgMap) return;
+                    bgMap.invalidateSize();
+                    clearTimeout(bgMapResizeTimer);
+                    bgMapResizeTimer = setTimeout(() => {
+                        if (bgMap) bgMap.setZoom(computeBgMapZoom(), { animate: true });
+                    }, 200);
+                });
+            } catch (e) { /* mappa di sfondo non essenziale, ignora eventuali errori */ }
+        }
+
         function enterGame() {
+            SoundManager.resume();
+            SoundManager.playClick();
+            SoundManager.stopMusic();
             const menu = document.getElementById('main-menu');
             const uiElements = document.querySelectorAll('.game-ui');
             menu.classList.add('hidden');
-            setTimeout(() => { uiElements.forEach(el => el.classList.add('visible')); }, 500);
+            setTimeout(() => { uiElements.forEach(el => el.classList.add('visible')); attachUISounds(); }, 500);
         }
         function toggleNewsModal() { document.getElementById('news-modal').classList.toggle('open'); }
 
@@ -1045,6 +1876,9 @@
             }
         }
 
+        let selectedSeat = null;
+        let pendingFlightNo = null, pendingGate = null, pendingAircraftType = null, pendingAirlineType = null;
+        let pendingDep = null, pendingArr = null;
         let planeMarker = null, routeLine = null, flightInterval = null;
         let isLanding = false, landingZoomInterval = null, landingZoomLevel = 12;
         let departureMarker = null, arrivalMarker = null;
@@ -1068,6 +1902,8 @@
                 btn.classList.add('paused');
                 span.innerText = t.resume;
                 icon.className = 'fa-solid fa-play';
+                const statusEl = document.getElementById('status-val');
+                if (statusEl) { statusEl.dataset.prevText = statusEl.innerText; statusEl.dataset.prevColor = statusEl.style.color; statusEl.innerText = t.status_paused; statusEl.style.color = "#f59e0b"; }
             } else {
                 btn.classList.remove('paused');
                 span.innerText = t.pause;
@@ -1132,7 +1968,177 @@
             'BAW': 'BA', 'UAE': 'EK', 'AAL': 'AA', 'DAL': 'DL', 'WZZ': 'W6'
         };
 
-        function startFlight() {
+        // --- COLORI BIGLIETTO PER COMPAGNIA ---
+        const airlineTheme = {
+            'RYR': { primary: '#12358f', accent: '#ffde00', stub1: '#12358f', stub2: '#081c4d' }, // Ryanair navy/giallo
+            'EZY': { primary: '#ff6600', accent: '#132339', stub1: '#ff7a1a', stub2: '#8c3c00' }, // easyJet arancio
+            'ITY': { primary: '#003a70', accent: '#c8102e', stub1: '#003a70', stub2: '#001f3d' }, // ITA Airways blu
+            'DLH': { primary: '#05164d', accent: '#f9ba00', stub1: '#0a1f6b', stub2: '#05164d' }, // Lufthansa blu/giallo
+            'AFR': { primary: '#002157', accent: '#ed1c24', stub1: '#0033a0', stub2: '#001233' }, // Air France blu/rosso
+            'BAW': { primary: '#075aaa', accent: '#ed1c24', stub1: '#075aaa', stub2: '#00274d' }, // British Airways blu
+            'UAE': { primary: '#a6070d', accent: '#c8a75b', stub1: '#a6070d', stub2: '#5c0308' }, // Emirates rosso/oro
+            'AAL': { primary: '#0078d2', accent: '#c8102e', stub1: '#0078d2', stub2: '#003a63' }, // American blu/rosso
+            'DAL': { primary: '#a70019', accent: '#003366', stub1: '#a70019', stub2: '#5c000e' }, // Delta rosso
+            'WZZ': { primary: '#c6007e', accent: '#2e1a47', stub1: '#c6007e', stub2: '#2e1a47' }  // Wizz Air magenta/viola
+        };
+        function applyAirlineTheme(airlineType) {
+            const th = airlineTheme[airlineType] || { primary: '#0369a1', accent: '#38bdf8', stub1: '#1e293b', stub2: '#0f172a' };
+            const bp = document.getElementById('boarding-pass');
+            bp.style.setProperty('--bp-primary', th.primary);
+            bp.style.setProperty('--bp-accent', th.accent);
+            bp.style.setProperty('--bp-stub-bg', th.stub1);
+            bp.style.setProperty('--bp-stub-bg2', th.stub2);
+        }
+
+        // --- SEAT MAP CONFIGURATION PER AIRCRAFT ---
+        function getSeatConfig(type) {
+            switch (type) {
+                case 'F22': return { rows: 1, cols: ['A'] };
+                case 'SPIT': return { rows: 1, cols: ['A'] };
+                case 'C172': return { rows: 2, cols: ['A', 'B'] };
+                case 'G7500': return { rows: 4, cols: ['A', 'B'] };
+                case 'PC12': return { rows: 3, cols: ['A', 'B', 'C'] };
+                case 'AN225': return { rows: 2, cols: ['A', 'B', 'C'] };
+                case 'E190': return { rows: 17, cols: ['A', 'B', 'C', 'D'] };
+                case 'CONC': return { rows: 10, cols: ['A', 'B', 'C', 'D'] };
+                case 'A320': case 'B737': return { rows: 26, cols: ['A', 'B', 'C', 'D', 'E', 'F'] };
+                case 'B787': case 'A350': return { rows: 30, cols: ['A', 'B', 'C', 'D', 'E', 'F'] };
+                case 'B747': case 'A380': return { rows: 34, cols: ['A', 'B', 'C', 'D', 'E', 'F'] };
+                default: return { rows: 20, cols: ['A', 'B', 'C', 'D', 'E', 'F'] };
+            }
+        }
+
+        // --- STEP 1: OPEN SEAT SELECTION (replaces the old direct takeoff) ---
+        function openSeatSelection() {
+            const dep = airports.find(a => a.id === depSelect.value);
+            const arr = airports.find(a => a.id === arrSelect.value);
+            if (!dep || !arr || dep.id === arr.id) { SoundManager.playClick(); return; }
+
+            pendingDep = dep; pendingArr = arr;
+            pendingAircraftType = document.getElementById('aircraft-type').value;
+            pendingAirlineType = document.getElementById('airline-select').value;
+            const prefix = airlineCodes[pendingAirlineType] || 'FL';
+            pendingFlightNo = prefix + ' ' + Math.floor(Math.random() * 9000 + 100);
+            pendingGate = String.fromCharCode(65 + Math.floor(Math.random() * 6)) + Math.floor(Math.random() * 30 + 1);
+            selectedSeat = null;
+
+            const depName = currentLang === 'it' ? dep.name : dep.name_en;
+            const arrName = currentLang === 'it' ? arr.name : arr.name_en;
+            document.getElementById('seat-flight-summary').innerHTML =
+                `<b>${pendingFlightNo}</b> · ${dep.id} → ${arr.id}<br><span style="color:var(--text-muted); font-size:0.8rem;">${depName} → ${arrName}</span>`;
+
+            buildSeatGrid();
+            document.getElementById('confirm-seat-btn').disabled = true;
+            document.getElementById('seat-selected-readout').classList.remove('visible');
+            document.getElementById('seat-modal').classList.add('open');
+        }
+        function closeSeatModal() {
+            document.getElementById('seat-modal').classList.remove('open');
+        }
+
+        function buildSeatGrid() {
+            const cfg = getSeatConfig(pendingAircraftType);
+            const grid = document.getElementById('seat-grid');
+            grid.innerHTML = '';
+            const split = cfg.cols.length >= 3 ? Math.ceil(cfg.cols.length / 2) : cfg.cols.length;
+            const exitRows = new Set([1, cfg.rows > 12 ? Math.round(cfg.rows / 2) : null].filter(Boolean));
+            let seatIndex = 0;
+
+            for (let r = 1; r <= cfg.rows; r++) {
+                const rowEl = document.createElement('div');
+                rowEl.className = 'seat-row' + (exitRows.has(r) ? ' exit-row' : '');
+                const numEl = document.createElement('div');
+                numEl.className = 'seat-row-num';
+                numEl.textContent = r;
+                rowEl.appendChild(numEl);
+
+                cfg.cols.forEach((colLetter, idx) => {
+                    if (cfg.cols.length >= 3 && idx === split) {
+                        const aisle = document.createElement('div');
+                        aisle.className = 'seat-aisle';
+                        rowEl.appendChild(aisle);
+                    }
+                    const seatId = r + colLetter;
+                    const taken = Math.random() < 0.28;
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'seat-cell' + (taken ? ' taken' : '');
+                    btn.style.animationDelay = (Math.min(seatIndex, 40) * 8) + 'ms';
+                    seatIndex++;
+                    btn.textContent = colLetter;
+                    btn.title = seatId;
+                    btn.disabled = taken;
+                    if (!taken) btn.onclick = () => selectSeat(seatId, btn);
+                    rowEl.appendChild(btn);
+                });
+                grid.appendChild(rowEl);
+            }
+        }
+
+        function selectSeat(seatId, el) {
+            document.querySelectorAll('.seat-cell.selected').forEach(s => s.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedSeat = seatId;
+            document.getElementById('confirm-seat-btn').disabled = false;
+            document.getElementById('seat-selected-readout').classList.add('visible');
+            document.getElementById('seat-selected-readout-val').textContent = seatId;
+            SoundManager.playClick();
+        }
+
+        // --- STEP 2: CONFIRM SEAT -> SHOW BOARDING PASS ---
+        function confirmSeatSelection() {
+            if (!selectedSeat) return;
+            closeSeatModal();
+            showBoardingPass();
+        }
+
+        function showBoardingPass() {
+            const dep = pendingDep, arr = pendingArr;
+            const depName = currentLang === 'it' ? dep.name : dep.name_en;
+            const arrName = currentLang === 'it' ? arr.name : arr.name_en;
+            const aircraftSelect = document.getElementById('aircraft-type');
+            const airlineSelect = document.getElementById('airline-select');
+            const aircraftLabel = aircraftSelect.options[aircraftSelect.selectedIndex].text;
+            const airlineLabel = airlineSelect.options[airlineSelect.selectedIndex].text;
+
+            const now = new Date();
+            const dateStr = now.toLocaleDateString(currentLang === 'it' ? 'it-IT' : 'en-GB');
+            const boardTime = new Date(now.getTime() + 20 * 60000);
+            const boardStr = boardTime.getHours().toString().padStart(2, '0') + ':' + boardTime.getMinutes().toString().padStart(2, '0');
+
+            applyAirlineTheme(pendingAirlineType);
+
+            document.getElementById('bp-airline').textContent = airlineLabel;
+            document.getElementById('bp-from-code').textContent = dep.id;
+            document.getElementById('bp-from-name').textContent = depName;
+            document.getElementById('bp-to-code').textContent = arr.id;
+            document.getElementById('bp-to-name').textContent = arrName;
+            document.getElementById('bp-flightno').textContent = pendingFlightNo;
+            document.getElementById('bp-aircraft').textContent = aircraftLabel;
+            document.getElementById('bp-gate').textContent = pendingGate;
+            document.getElementById('bp-seat').textContent = selectedSeat;
+            document.getElementById('bp-stub-seat').textContent = selectedSeat;
+            document.getElementById('bp-date').textContent = dateStr;
+            document.getElementById('bp-boarding').textContent = boardStr;
+
+            const bp = document.getElementById('boarding-pass');
+            bp.classList.remove('filled', 'torn');
+            document.getElementById('bp-continue-btn').style.display = 'none';
+
+            document.getElementById('boarding-pass-modal').classList.add('open');
+
+            setTimeout(() => bp.classList.add('filled'), 150);
+            setTimeout(() => { bp.classList.add('torn'); SoundManager.playTear(); }, 1150);
+            setTimeout(() => { document.getElementById('bp-continue-btn').style.display = 'flex'; }, 1750);
+        }
+
+        // --- STEP 3: CLOSE TICKET -> ACTUALLY START THE FLIGHT ---
+        function closeBoardingPass() {
+            document.getElementById('boarding-pass-modal').classList.remove('open');
+            beginFlightExecution();
+        }
+
+        function beginFlightExecution() {
             const t = translations[currentLang];
             if(planeMarker) map.removeLayer(planeMarker);
             if(routeLine) map.removeLayer(routeLine);
@@ -1157,6 +2163,7 @@
 
             document.getElementById('fly-btn').style.display = 'none';
             document.getElementById('cancel-btn').style.display = 'flex';
+            SoundManager.playTakeoff();
             
             let baseSpeed = 480, cruiseAltitude = 36000, passengers = 0;
             if (aircraftType === 'B787') { baseSpeed = 500; cruiseAltitude = 39000; passengers = Math.floor(Math.random() * (296 - 150) + 150); }
@@ -1174,13 +2181,13 @@
             else if (aircraftType === 'PC12') { baseSpeed = 270; cruiseAltitude = 25000; passengers = 8; }
             else { passengers = Math.floor(Math.random() * (180 - 80) + 80); }
 
-            const prefix = airlineCodes[airlineType] || 'FL';
-            const flightNo = (prefix + ' ' + Math.floor(Math.random() * 9000 + 100));
+            const flightNo = pendingFlightNo || (airlineCodes[airlineType] || 'FL') + ' ' + Math.floor(Math.random() * 9000 + 100);
+            const seatLabel = currentLang === 'it' ? 'Posto' : 'Seat';
             
             const weatherConditions = ['Sereno ☀️', 'Nuvoloso ⛅', 'Pioggia 🌧️', 'Vento 💨', 'Temporale ⛈️'];
             const weatherDest = weatherConditions[Math.floor(Math.random() * weatherConditions.length)];
 
-            document.getElementById('flight-no').innerText = `Volo: ${flightNo} | ${aircraftType}`;
+            document.getElementById('flight-no').innerText = `Volo: ${flightNo} | ${aircraftType}${selectedSeat ? ` | ${seatLabel} ${selectedSeat}` : ''}`;
             document.getElementById('pax-count').innerHTML = `<i class="fa-solid fa-users" style="color:var(--primary)"></i> ${passengers}`;
             document.getElementById('top-weather-dest').innerHTML = weatherDest;
             document.getElementById('telemetry-cabin').style.display = 'block'; 
@@ -1326,11 +2333,13 @@
                 const landingFactor = (1 - ((pct - 0.9) / 0.1)); 
                 currentAlt = maxAlt * landingFactor;
                 currentSpd = maxSpd * (0.3 + (landingFactor * 0.7)); 
+                SoundManager.playLandingChime();
             } else {
                 status = t.status_cruise; statusColor = "#38bdf8";
                 currentAlt = maxAlt; currentSpd = maxSpd; 
                 if(pct > 0.2 && pct < 0.22) status = t.status_meal;
                 if(pct > 0.5 && pct < 0.52) status = t.status_systems;
+                SoundManager.playCruiseSwitch();
             }
 
             document.getElementById('alt-val-top').innerText = Math.floor(Math.max(0, currentAlt)).toLocaleString();
@@ -1349,6 +2358,7 @@
             const t = translations[currentLang];
             clearInterval(flightInterval);
             isPaused = false;
+            SoundManager.playArrival();
             if(departureMarker) { map.removeLayer(departureMarker); departureMarker = null; }
             if(arrivalMarker) { map.removeLayer(arrivalMarker); arrivalMarker = null; }
 
