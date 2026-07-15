@@ -1534,9 +1534,9 @@
             if (isNaN(sfxVol)) sfxVol = 1.0;
             let muted = localStorage.getItem('rfx_muted') === 'true';
 
-            // Su mobile il volume generale viene alzato di piu' (altoparlanti piu' deboli).
+            // Volume generale alzato per tutti; su mobile ancora di piu' (altoparlanti piu' deboli).
             const isMobileAudio = window.innerWidth <= 768 || ('ontouchstart' in window);
-            const MASTER_GAIN = isMobileAudio ? 6.8 : 4.6;
+            const MASTER_GAIN = isMobileAudio ? 9.5 : 6.5;
 
             function ensureCtx() {
                 if (ctx) return;
@@ -1545,9 +1545,9 @@
                 // Limiter finale: con il volume generale alzato di molto, questo compressore
                 // evita distorsioni/clipping quando più suoni si sovrappongono.
                 const limiter = ctx.createDynamicsCompressor();
-                limiter.threshold.value = -6;
-                limiter.knee.value = 12;
-                limiter.ratio.value = 16;
+                limiter.threshold.value = -10;
+                limiter.knee.value = 10;
+                limiter.ratio.value = 20;
                 limiter.attack.value = 0.002;
                 limiter.release.value = 0.15;
                 limiter.connect(ctx.destination);
@@ -2511,7 +2511,7 @@
 
         // --- COLORI BIGLIETTO PER COMPAGNIA ---
         const airlineTheme = {
-            'RYR': { primary: '#12358f', accent: '#ffde00', stub1: '#12358f', stub2: '#081c4d' }, // Ryanair navy/giallo
+            'RYR': { primary: '#e6b800', accent: '#12358f', stub1: '#e6b800', stub2: '#8a6c00' }, // Ryanair giallo/navy
             'EZY': { primary: '#ff6600', accent: '#132339', stub1: '#ff7a1a', stub2: '#8c3c00' }, // easyJet arancio
             'ITY': { primary: '#003a70', accent: '#c8102e', stub1: '#003a70', stub2: '#001f3d' }, // ITA Airways blu
             'DLH': { primary: '#05164d', accent: '#f9ba00', stub1: '#0a1f6b', stub2: '#05164d' }, // Lufthansa blu/giallo
@@ -2713,15 +2713,28 @@
             const bp = document.getElementById('boarding-pass');
             if (bp.classList.contains('torn')) return;
             SoundManager.resume();
-            // Niente classe "dragging": lasciamo lavorare la transizione CSS dello stub
-            // cosi' il movimento e' morbido e non uno scatto istantaneo.
+
+            // Partenza esplicita da fermo e transizione impostata a mano: cosi' il
+            // browser ha sempre un punto di partenza chiaro e il movimento e' morbido,
+            // non uno scatto istantaneo.
+            stub.style.transition = 'none';
+            stub.style.transform = 'translateX(0px) translateY(0px) rotate(0deg)';
+
             requestAnimationFrame(() => {
-                stub.style.transform = 'translateX(16px) translateY(3px) rotate(2deg)';
+                requestAnimationFrame(() => {
+                    stub.style.transition = 'transform 0.45s cubic-bezier(.33,.1,.2,1)';
+                    stub.style.transform = 'translateX(14px) translateY(2px) rotate(1.5deg)';
+
+                    setTimeout(() => {
+                        stub.style.transition = 'transform 0.5s cubic-bezier(.4,0,.2,1)';
+                        stub.style.transform = 'translateX(95px) translateY(16px) rotate(11deg)';
+                        setTimeout(() => {
+                            stub.style.transition = '';
+                            finishTear(stub, bp);
+                        }, 480);
+                    }, 420);
+                });
             });
-            setTimeout(() => {
-                stub.style.transform = 'translateX(95px) translateY(16px) rotate(11deg)';
-            }, 280);
-            setTimeout(() => finishTear(stub, bp), 780);
         }
 
         function setupTicketTearHandlers() {
