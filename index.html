@@ -776,7 +776,7 @@
             .eta-panel { top: 10px; padding: 4px 12px; font-size: 0.8rem; border-radius: 30px; }
             
             /* 4. Settings/Lang */
-            .settings-panel { top: 10px; left: 10px; bottom: auto; }
+            .settings-panel { top: 26px; left: 10px; bottom: auto; }
             .lang-btn { padding: 4px 10px; font-size: 0.75rem; }
             .credits { display: none; }
             
@@ -791,13 +791,13 @@
             .control-pill-btn { padding: 8px 16px; font-size: 0.8rem; background: rgba(15, 23, 42, 0.95); }
 
             /* 6. News Button */
-            .news-btn-wrapper { top: 50px; left: 10px; right: auto; bottom: auto; }
+            .news-btn-wrapper { top: 66px; left: 10px; right: auto; bottom: auto; }
             .news-btn { padding: 4px 10px; font-size: 0.75rem; }
 
             /* 6b. Fullscreen: staccato dal settings-panel e posizionato sotto il pulsante notizie */
             #fullscreen-btn {
                 position: fixed;
-                top: 92px;
+                top: 108px;
                 left: 10px;
                 z-index: 1000;
             }
@@ -1528,18 +1528,19 @@
 
             // Volume generale alzato molto per tutti; su mobile ancora di piu'.
             const isMobileAudio = window.innerWidth <= 768 || ('ontouchstart' in window);
-            const MASTER_GAIN = isMobileAudio ? 13.5 : 10.5;
+            const MASTER_GAIN = isMobileAudio ? 9.0 : 7.5;
 
             function ensureCtx() {
                 if (ctx) return;
                 ctx = new (window.AudioContext || window.webkitAudioContext)();
 
-                // Limiter finale: con il volume generale alzato di molto, questo compressore
-                // evita distorsioni/clipping quando più suoni si sovrappongono.
+                // Limiter finale: interviene solo vicino al clipping (soglia alta, ratio alto),
+                // cosi' fa da rete di sicurezza senza schiacciare tutta la dinamica: lo slider
+                // del volume continua a fare una differenza reale su tutto il range 0-100%.
                 const limiter = ctx.createDynamicsCompressor();
-                limiter.threshold.value = -18;
-                limiter.knee.value = 8;
-                limiter.ratio.value = 20;
+                limiter.threshold.value = -4;
+                limiter.knee.value = 4;
+                limiter.ratio.value = 14;
                 limiter.attack.value = 0.001;
                 limiter.release.value = 0.2;
                 limiter.connect(ctx.destination);
@@ -2299,7 +2300,41 @@
             depSelect.value = airports[depIndex].id; arrSelect.value = airports[arrIndex].id;
         }
 
-        function toggleTelemetry() { document.getElementById('telemetry-dropdown').classList.toggle('open'); }
+        function toggleTelemetry() {
+            document.getElementById('telemetry-dropdown').classList.toggle('open');
+            setTimeout(positionEtaMobile, 650);
+        }
+
+        // --- Su mobile il pannello ETA (arrivo) va posizionato sotto il pulsante
+        // "Segui Aereo", invece che come pillola centrata in alto. La posizione del
+        // pulsante puo' spostarsi (es. quando si apre/chiude il pannello dati volo),
+        // quindi la ricalcoliamo dinamicamente invece di usare un valore fisso. ---
+        function positionEtaMobile() {
+            const eta = document.getElementById('eta-display');
+            const followBtn = document.getElementById('follow-btn');
+            if (!eta || !followBtn) return;
+            const isMobileLayout = window.innerWidth <= 768;
+            if (!isMobileLayout) {
+                eta.style.position = '';
+                eta.style.top = '';
+                eta.style.left = '';
+                eta.style.right = '';
+                eta.style.transform = '';
+                return;
+            }
+            const rect = followBtn.getBoundingClientRect();
+            eta.style.position = 'fixed';
+            eta.style.top = (rect.bottom + 8) + 'px';
+            eta.style.left = 'auto';
+            eta.style.right = '8px';
+            eta.style.transform = 'none';
+        }
+        window.addEventListener('resize', positionEtaMobile);
+        window.addEventListener('orientationchange', () => setTimeout(positionEtaMobile, 200));
+        document.addEventListener('DOMContentLoaded', () => {
+            const dropdown = document.getElementById('telemetry-dropdown');
+            if (dropdown) dropdown.addEventListener('transitionend', positionEtaMobile);
+        });
         let isFollowingPlane = false;
         function toggleFollowPlane() {
             const t = translations[currentLang];
@@ -2670,21 +2705,14 @@
             setTimeout(() => {
                 bp.classList.add('filled');
                 bp.classList.add('tear-ready');
-                const isMobileTear = window.innerWidth <= 768 || ('ontouchstart' in window);
-                if (isMobileTear) {
-                    // Su mobile il trascinamento e' scomodo: lo strappo avviene da solo.
-                    document.getElementById('bp-tear-hint').style.display = 'none';
-                    setTimeout(() => { autoTearTicket(); }, 700);
-                } else {
-                    document.getElementById('bp-tear-hint').style.display = 'flex';
-                    setupTicketTearHandlers();
-                }
+                document.getElementById('bp-tear-hint').style.display = 'flex';
+                setupTicketTearHandlers();
             }, 150);
         }
 
-        // --- STRAPPO DEL BIGLIETTO: su desktop l'utente trascina lo stub
-        // (mouse), su mobile avviene automaticamente perche' il gesto di
-        // trascinamento e' scomodo da fare col dito. ---
+        // --- STRAPPO DEL BIGLIETTO: l'utente trascina lo stub con il dito
+        // (o il mouse). Su mobile lo stub sta sotto la carta, quindi si stacca
+        // trascinando verso il basso; su desktop sta a destra, quindi verso destra. ---
         let ticketDragState = null;
         function finishTear(stub, bp) {
             if (bp.classList.contains('torn')) return;
@@ -2698,36 +2726,12 @@
             setTimeout(() => { document.getElementById('bp-continue-btn').style.display = 'flex'; }, 500);
         }
 
-        function autoTearTicket() {
-            const stub = document.getElementById('bp-stub');
-            const bp = document.getElementById('boarding-pass');
-            if (bp.classList.contains('torn')) return;
-            SoundManager.resume();
-
-            // Partenza esplicita da fermo, poi reflow forzato: cosi' il browser
-            // "fotografa" davvero lo stato di partenza prima di applicare la
-            // transizione, ed evita lo scatto iniziale.
-            stub.style.transition = 'none';
-            stub.style.transform = 'translateX(0px) translateY(0px) rotate(0deg)';
-            void stub.offsetHeight; // forza il reflow
-
-            stub.style.transition = 'transform 0.5s cubic-bezier(.33,.1,.2,1)';
-            stub.style.transform = 'translateX(16px) translateY(3px) rotate(2deg)';
-
-            setTimeout(() => {
-                stub.style.transition = 'transform 0.6s cubic-bezier(.4,0,.2,1)';
-                stub.style.transform = 'translateX(96px) translateY(16px) rotate(11deg)';
-                setTimeout(() => {
-                    stub.style.transition = '';
-                    finishTear(stub, bp);
-                }, 550);
-            }, 480);
-        }
-
         function setupTicketTearHandlers() {
             const stub = document.getElementById('bp-stub');
             const bp = document.getElementById('boarding-pass');
             const TEAR_THRESHOLD = 70; // px di trascinamento necessari per completare lo strappo
+
+            function isMobileTear() { return window.innerWidth <= 768 || ('ontouchstart' in window); }
 
             function onPointerDown(e) {
                 if (bp.classList.contains('torn') || !bp.classList.contains('tear-ready')) return;
@@ -2740,9 +2744,16 @@
                 if (!ticketDragState || ticketDragState.pointerId !== e.pointerId) return;
                 const dx = e.clientX - ticketDragState.startX;
                 const dy = e.clientY - ticketDragState.startY;
-                const clampedX = Math.max(0, dx); // solo trascinamento verso destra/basso stacca lo stub
-                stub.style.transform = `translateX(${clampedX * 0.65}px) translateY(${Math.max(-8, Math.min(24, dy * 0.3))}px) rotate(${Math.min(clampedX * 0.15, 10)}deg)`;
-                if (clampedX > TEAR_THRESHOLD) finishTear(stub, bp);
+                if (isMobileTear()) {
+                    // Su mobile lo stub e' sotto la carta: si stacca trascinando verso il basso.
+                    const clampedY = Math.max(0, dy);
+                    stub.style.transform = `translateY(${clampedY * 0.65}px) translateX(${Math.max(-8, Math.min(24, dx * 0.3))}px) rotate(${Math.min(clampedY * 0.15, 10)}deg)`;
+                    if (clampedY > TEAR_THRESHOLD) finishTear(stub, bp);
+                } else {
+                    const clampedX = Math.max(0, dx); // solo trascinamento verso destra stacca lo stub
+                    stub.style.transform = `translateX(${clampedX * 0.65}px) translateY(${Math.max(-8, Math.min(24, dy * 0.3))}px) rotate(${Math.min(clampedX * 0.15, 10)}deg)`;
+                    if (clampedX > TEAR_THRESHOLD) finishTear(stub, bp);
+                }
             }
             function onPointerUp(e) {
                 if (!ticketDragState || ticketDragState.pointerId !== e.pointerId) return;
@@ -2825,6 +2836,8 @@
             document.getElementById('telemetry-dropdown').classList.add('open');
             document.getElementById('eta-display').style.display = 'flex';
             document.getElementById('center-controls').style.display = 'flex';
+            positionEtaMobile();
+            setTimeout(positionEtaMobile, 650);
             
             const followBtn = document.getElementById('follow-btn');
             followBtn.classList.remove('active');
