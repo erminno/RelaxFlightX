@@ -930,14 +930,6 @@
             <div class="settings-section">
                 <div class="settings-section-title"><i class="fa-solid fa-volume-high"></i> <span data-translate="settings_audio">Audio</span></div>
 
-                <div class="mute-all-row" style="margin-bottom: 1rem;">
-                    <span data-translate="settings_mute_all">Disattiva tutti i suoni</span>
-                    <label class="switch-toggle">
-                        <input type="checkbox" id="mute-all-toggle" onchange="setMuted(this.checked)">
-                        <span class="switch-slider"></span>
-                    </label>
-                </div>
-
                 <div class="volume-row">
                     <div class="icon-btn" style="cursor:default;"><i class="fa-solid fa-bell"></i></div>
                     <div class="volume-row-label">
@@ -1534,9 +1526,9 @@
             if (isNaN(sfxVol)) sfxVol = 1.0;
             let muted = localStorage.getItem('rfx_muted') === 'true';
 
-            // Volume generale alzato per tutti; su mobile ancora di piu' (altoparlanti piu' deboli).
+            // Volume generale alzato molto per tutti; su mobile ancora di piu'.
             const isMobileAudio = window.innerWidth <= 768 || ('ontouchstart' in window);
-            const MASTER_GAIN = isMobileAudio ? 9.5 : 6.5;
+            const MASTER_GAIN = isMobileAudio ? 13.5 : 10.5;
 
             function ensureCtx() {
                 if (ctx) return;
@@ -1545,11 +1537,11 @@
                 // Limiter finale: con il volume generale alzato di molto, questo compressore
                 // evita distorsioni/clipping quando più suoni si sovrappongono.
                 const limiter = ctx.createDynamicsCompressor();
-                limiter.threshold.value = -10;
-                limiter.knee.value = 10;
+                limiter.threshold.value = -18;
+                limiter.knee.value = 8;
                 limiter.ratio.value = 20;
-                limiter.attack.value = 0.002;
-                limiter.release.value = 0.15;
+                limiter.attack.value = 0.001;
+                limiter.release.value = 0.2;
                 limiter.connect(ctx.destination);
 
                 masterGain = ctx.createGain();
@@ -1875,7 +1867,6 @@
         function toggleQuickMute() {
             const nowMuted = !SoundManager.getState().muted;
             SoundManager.setMuted(nowMuted);
-            document.getElementById('mute-all-toggle').checked = nowMuted;
             updateQuickMuteIcon();
         }
         function updateQuickMuteIcon() {
@@ -1913,7 +1904,6 @@
             const st = SoundManager.getState();
             document.getElementById('sfx-volume').value = Math.round(st.sfxVol * 100);
             document.getElementById('sfx-vol-label').innerText = Math.round(st.sfxVol * 100) + '%';
-            document.getElementById('mute-all-toggle').checked = st.muted;
             updateQuickMuteIcon();
             updateFullscreenIcon();
 
@@ -2714,27 +2704,24 @@
             if (bp.classList.contains('torn')) return;
             SoundManager.resume();
 
-            // Partenza esplicita da fermo e transizione impostata a mano: cosi' il
-            // browser ha sempre un punto di partenza chiaro e il movimento e' morbido,
-            // non uno scatto istantaneo.
+            // Partenza esplicita da fermo, poi reflow forzato: cosi' il browser
+            // "fotografa" davvero lo stato di partenza prima di applicare la
+            // transizione, ed evita lo scatto iniziale.
             stub.style.transition = 'none';
             stub.style.transform = 'translateX(0px) translateY(0px) rotate(0deg)';
+            void stub.offsetHeight; // forza il reflow
 
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    stub.style.transition = 'transform 0.45s cubic-bezier(.33,.1,.2,1)';
-                    stub.style.transform = 'translateX(14px) translateY(2px) rotate(1.5deg)';
+            stub.style.transition = 'transform 0.5s cubic-bezier(.33,.1,.2,1)';
+            stub.style.transform = 'translateX(16px) translateY(3px) rotate(2deg)';
 
-                    setTimeout(() => {
-                        stub.style.transition = 'transform 0.5s cubic-bezier(.4,0,.2,1)';
-                        stub.style.transform = 'translateX(95px) translateY(16px) rotate(11deg)';
-                        setTimeout(() => {
-                            stub.style.transition = '';
-                            finishTear(stub, bp);
-                        }, 480);
-                    }, 420);
-                });
-            });
+            setTimeout(() => {
+                stub.style.transition = 'transform 0.6s cubic-bezier(.4,0,.2,1)';
+                stub.style.transform = 'translateX(96px) translateY(16px) rotate(11deg)';
+                setTimeout(() => {
+                    stub.style.transition = '';
+                    finishTear(stub, bp);
+                }, 550);
+            }, 480);
         }
 
         function setupTicketTearHandlers() {
