@@ -2,8 +2,9 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>RelaxFlightX - Flight Simulator Pro v5.7</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2338bdf8' d='M22 16.5v-2l-8.5-5V4c0-.83-.67-1.5-1.5-1.5S10.5 3.17 10.5 4v5.5L2 14.5v2l8.5-2.6V19l-2.5 1.8V22l3.5-1 3.5 1v-1.2L12.5 19v-5.1L22 16.5z'/%3E%3C/svg%3E">
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -70,9 +71,9 @@
             font-family: 'JetBrains Mono', monospace;
         }
 
-        .menu-content { position: relative; z-index: 3; text-align: center; color: white; padding: 2rem; width: 100%; max-width: 600px; }
+        .menu-content { position: relative; z-index: 3; text-align: center; color: white; padding: 2rem; width: 100%; max-width: 600px; margin: 0 auto; }
         .menu-icon { font-size: 5rem; color: var(--primary); margin-bottom: 20px; filter: drop-shadow(0 0 30px rgba(56,189,248,0.6)); }
-        .menu-title { font-size: 3.5rem; font-weight: 800; letter-spacing: -2px; margin-bottom: 10px; background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .menu-title { font-size: 3.9rem; font-weight: 800; letter-spacing: -2px; margin-bottom: 10px; background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .menu-subtitle { font-family: 'JetBrains Mono', monospace; color: var(--text-muted); font-size: 1rem; margin-bottom: 50px; letter-spacing: 1px; }
         
         .menu-btn {
@@ -85,8 +86,12 @@
         
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
 
+        /* --- MENU: TUTTI I PULSANTI IN COLONNA CENTRALE VERTICALE (desktop) --- */
+        .menu-all-actions { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
+
         /* --- MENU: SECONDARY ACTIONS (Impostazioni ecc.) --- */
-        .menu-secondary-actions { display: flex; gap: 14px; justify-content: center; margin-top: 18px; }
+        .menu-secondary-actions { display: flex; flex-direction: column; align-items: center; gap: 14px; justify-content: center; margin: 0; }
+        .menu-secondary-actions .menu-btn-secondary { width: 220px; justify-content: center; }
         .menu-btn-secondary {
             background: rgba(255,255,255,0.06); color: var(--text-main); border: 1px solid rgba(255,255,255,0.2);
             padding: 12px 26px; font-size: 0.9rem; font-weight: 700; border-radius: 50px; cursor: pointer;
@@ -96,6 +101,9 @@
         .menu-btn-secondary:hover { background: rgba(255,255,255,0.14); transform: translateY(-2px); border-color: var(--primary); color: var(--primary); }
 
         .menu-version { margin-top: 34px; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: rgba(255,255,255,0.35); letter-spacing: 1px; }
+
+        /* --- MENU MINI ACTIONS (pallini fullscreen + feedback) --- */
+        .menu-mini-actions { display: flex; gap: 14px; justify-content: center; align-items: center; margin-top: 4px; }
 
         /* --- ICON BUTTONS (gear, mute, back) --- */
         .icon-btn {
@@ -126,6 +134,19 @@
         }
         .lang-option:hover { background: rgba(30, 41, 59, 0.9); color: white; }
         .lang-option.active { background: var(--primary); color: #0f172a; border-color: var(--primary); box-shadow: 0 0 15px rgba(56,189,248,0.4); }
+
+        .stat-row {
+            display: flex; align-items: center; gap: 14px; margin-bottom: 0.8rem; padding: 12px 14px;
+            background: rgba(30, 41, 59, 0.5); border-radius: 14px; border: 1px solid rgba(255,255,255,0.08);
+        }
+        .stat-row:last-child { margin-bottom: 0; }
+        .stat-row-icon {
+            width: 38px; height: 38px; border-radius: 50%; background: rgba(56,189,248,0.12);
+            display: flex; align-items: center; justify-content: center; color: var(--primary); flex-shrink: 0; font-size: 0.95rem;
+        }
+        .stat-row-label { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+        .stat-row-label span { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700; }
+        .stat-row-label b { font-size: 1.1rem; color: white; font-family: 'JetBrains Mono', monospace; }
 
         .volume-row { display: flex; align-items: center; gap: 14px; margin-bottom: 1rem; }
         .volume-row:last-child { margin-bottom: 0; }
@@ -390,6 +411,19 @@
         select:hover { background: rgba(30, 41, 59, 0.9); }
         select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1); }
 
+        #airline-select {
+            font-weight: 700; transition: background 0.35s ease, border-color 0.35s ease;
+        }
+        #airline-select option { background: var(--bg-dark); color: var(--text-main); }
+
+        #aircraft-type {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(16, 185, 129, 0.14));
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            font-weight: 700;
+        }
+        #aircraft-type:hover { background: linear-gradient(135deg, rgba(56, 189, 248, 0.32), rgba(16, 185, 129, 0.2)); }
+        #aircraft-type option { background: var(--bg-dark); color: var(--text-main); }
+
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 0.5rem; }
 
         .btn {
@@ -404,10 +438,23 @@
         .btn-danger {
             background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.5); color: var(--danger); margin-top: 10px; display: none; 
         }
+
+        /* --- FEEDBACK MODAL --- */
+        .feedback-desc { color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.2rem; }
+        .feedback-textarea {
+            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 14px; padding: 0.9rem; color: var(--text-main); font-family: 'Inter', sans-serif;
+            font-size: 0.95rem; resize: vertical; min-height: 100px; transition: border-color 0.2s ease;
+        }
+        .feedback-textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(56,189,248,0.15); }
+        .feedback-textarea::placeholder { color: var(--text-muted); }
+        .feedback-status { margin-top: 0.9rem; font-size: 0.85rem; min-height: 1.2em; text-align: center; font-weight: 600; }
+        .feedback-status.success { color: var(--accent); }
+        .feedback-status.error { color: var(--danger); }
         .btn-danger:hover { background: rgba(239, 68, 68, 0.2); box-shadow: 0 4px 20px rgba(239, 68, 68, 0.2); transform: translateY(-2px); }
 
-        .random-row-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
-        .random-btn { background: transparent; border: none; color: var(--primary); cursor: pointer; font-size: 0.9rem; transition: all 0.3s ease; padding: 4px; }
+        .random-row-header { display: flex; align-items: center; justify-content: flex-start; gap: 14px; margin-bottom: 0.5rem; }
+        .random-btn { background: transparent; border: none; color: var(--primary); cursor: pointer; font-size: 1.3rem; transition: all 0.3s ease; padding: 4px; }
         .random-btn:hover { color: white; transform: rotate(180deg); filter: drop-shadow(0 0 5px var(--primary)); }
 
         .settings-panel {
@@ -448,7 +495,7 @@
             padding: 2.5rem; width: 90%; max-width: 450px;
             box-shadow: 0 25px 80px rgba(0,0,0,0.7), 0 0 30px rgba(56,189,248,0.1); position: relative; 
             transform: translateY(30px) scale(0.95); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); 
-            text-align: left; overflow: hidden;
+            text-align: left; overflow-x: hidden; overflow-y: auto; max-height: 88vh; -webkit-overflow-scrolling: touch;
         }
         .modal-content::before {
             content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 6px;
@@ -518,11 +565,20 @@
         }
 
         .seat-map-scroll {
-            max-height: 260px; overflow-y: auto; margin-bottom: 0.9rem; padding: 4px 6px 4px 2px;
+            max-height: 260px; overflow-y: auto; margin-bottom: 0.9rem; padding: 4px 10px 4px 2px;
             background: linear-gradient(180deg, rgba(56,189,248,0.05), transparent 12%, transparent 88%, rgba(56,189,248,0.05));
             border-radius: 14px; border: 1px solid rgba(255,255,255,0.05);
+            scrollbar-width: thin; scrollbar-color: var(--primary) rgba(255,255,255,0.06);
         }
-        .seat-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; padding: 2px 4px; border-radius: 8px; }
+        .seat-map-scroll::-webkit-scrollbar { width: 8px; }
+        .seat-map-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
+        .seat-map-scroll::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--primary), #0284c7); border-radius: 10px;
+            box-shadow: 0 0 6px rgba(56,189,248,0.5);
+        }
+        .seat-map-scroll::-webkit-scrollbar-thumb:hover { background: #7dd3fc; }
+        .seat-grid { display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .seat-row { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 6px; padding: 2px 4px; border-radius: 8px; width: 100%; max-width: 320px; }
         .seat-row.exit-row { background: rgba(245,158,11,0.07); }
         .seat-row-num { width: 20px; flex-shrink: 0; font-size: 0.65rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; text-align: center; }
         .seat-aisle { width: 14px; flex-shrink: 0; position: relative; }
@@ -603,6 +659,9 @@
             transition: transform 0.6s cubic-bezier(.36,.66,.32,1), box-shadow 0.6s ease;
             will-change: transform;
         }
+        .bp-stub.tear-ready { cursor: grab; touch-action: none; }
+        .bp-stub.dragging { transition: none !important; cursor: grabbing; box-shadow: -6px 10px 30px rgba(0,0,0,0.6); }
+        #bp-tear-hint { transition: opacity 0.3s ease; }
         .bp-barcode { width: 24px; height: 84px; background: repeating-linear-gradient(90deg, #f8fafc 0 2px, transparent 2px 4px); }
         .bp-stub-seat { color: #f8fafc; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 1.05rem; }
         .bp-stub::before, .bp-stub::after {
@@ -735,11 +794,13 @@
                 z-index: 1000;
             }
             
-            .menu-title { font-size: 2.2rem; }
+            .menu-title { font-size: 2.5rem; }
             .menu-icon { font-size: 3rem; margin-bottom: 10px; }
             .menu-subtitle { font-size: 0.9rem; margin-bottom: 30px; }
 
             /* 7. Settings & audio controls */
+
+            .menu-all-actions { flex-direction: column; }
             .menu-secondary-actions { flex-direction: column; align-items: center; margin-top: 14px; }
             .menu-btn-secondary { width: 100%; max-width: 240px; justify-content: center; }
             .icon-btn { width: 36px; height: 36px; font-size: 0.85rem; }
@@ -757,21 +818,34 @@
             <i class="fa-solid fa-plane-up menu-icon"></i>
             <h1 class="menu-title">RelaxFlightX</h1>
             <p class="menu-subtitle" data-translate="menu_subtitle">The Most Realistic Flight Simulation</p>
-            <button class="menu-btn" onclick="enterGame()">
-                <i class="fa-solid fa-play"></i> <span data-translate="menu_start">START</span>
-            </button>
-            <div class="menu-secondary-actions">
-                <button class="menu-btn-secondary" onclick="openSettingsModal()">
-                    <i class="fa-solid fa-gear"></i> <span data-translate="settings">Impostazioni</span>
+            <div class="menu-all-actions">
+                <button class="menu-btn" onclick="enterGame()">
+                    <i class="fa-solid fa-play"></i> <span data-translate="menu_start">START</span>
                 </button>
-                <button class="menu-btn-secondary" onclick="toggleNewsModal()">
-                    <i class="fa-solid fa-newspaper"></i> <span data-translate="news_btn">News</span>
-                </button>
-                <button class="menu-btn-secondary" onclick="toggleFullscreen()" title="Schermo Intero">
-                    <i class="fa-solid fa-expand" id="fullscreen-icon-menu"></i> <span id="fullscreen-text-menu" data-translate="settings_fullscreen">Schermo Intero</span>
-                </button>
+                <div class="menu-secondary-actions">
+                    <button class="menu-btn-secondary" onclick="openSettingsModal()">
+                        <i class="fa-solid fa-gear"></i> <span data-translate="settings">Impostazioni</span>
+                    </button>
+                    <button class="menu-btn-secondary" onclick="toggleNewsModal()">
+                        <i class="fa-solid fa-newspaper"></i> <span data-translate="news_btn">News</span>
+                    </button>
+                    <button class="menu-btn-secondary" onclick="openStatsModal()">
+                        <i class="fa-solid fa-chart-simple"></i> <span data-translate="stats_btn">Statistiche</span>
+                    </button>
+                    <button class="menu-btn-secondary" onclick="openHowToPlayModal()">
+                        <i class="fa-solid fa-circle-question"></i> <span data-translate="howto_btn">Come si gioca?</span>
+                    </button>
+                    <div class="menu-mini-actions">
+                        <button class="icon-btn" onclick="toggleFullscreen()" title="Schermo Intero">
+                            <i class="fa-solid fa-expand" id="fullscreen-icon-menu"></i>
+                        </button>
+                        <button class="icon-btn" onclick="openFeedbackModal()" title="Feedback">
+                            <i class="fa-solid fa-comment-dots"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div class="menu-version">RelaxFlightX v5.7</div>
+            <div class="menu-version">RelaxFlightX v1.0</div>
             <div class="menu-map-credit">Map data © OpenStreetMap contributors, © CARTO</div>
         </div>
     </div>
@@ -795,6 +869,38 @@
                 <li><i class="fa-solid fa-mobile-screen-button"></i> <div><b data-translate="news_rotation">Supporto Mobile</b><br><span style="font-size:0.85rem; color:#94a3b8" data-translate="news_fixes">Mobile Support</span></div></li>
                 <li><i class="fa-solid fa-earth-americas"></i> <div><b data-translate="news_world">Mondo Espanso</b><br><span style="font-size:0.85rem; color:#94a3b8" data-translate="news_expansion">+100 Aeroporti internazionali</span></div></li>
             </ul>
+        </div>
+    </div>
+
+    <div id="howto-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeHowToPlayModal()">&times;</button>
+            <div class="modal-title">
+                <i class="fa-solid fa-circle-question"></i> <span data-translate="howto_title">Come si gioca?</span>
+            </div>
+            <ul class="news-list">
+                <li><i class="fa-solid fa-plane-departure"></i> <div><b data-translate="howto_step1_title">1. Scegli la rotta</b><br><span style="font-size:0.85rem; color:#94a3b8" data-translate="howto_step1_desc">Seleziona aeroporto di partenza e destinazione dal pannello laterale.</span></div></li>
+                <li><i class="fa-solid fa-plane"></i> <div><b data-translate="howto_step2_title">2. Personalizza il volo</b><br><span style="font-size:0.85rem; color:#94a3b8" data-translate="howto_step2_desc">Scegli compagnia aerea e aeromobile, poi premi Decolla.</span></div></li>
+                <li><i class="fa-solid fa-chair"></i> <div><b data-translate="howto_step3_title">3. Scegli il posto</b><br><span style="font-size:0.85rem; color:#94a3b8" data-translate="howto_step3_desc">Seleziona un posto sulla mappa cabina per ricevere la tua carta d'imbarco.</span></div></li>
+                <li><i class="fa-solid fa-earth-europe"></i> <div><b data-translate="howto_step4_title">4. Goditi il volo</b><br><span style="font-size:0.85rem; color:#94a3b8" data-translate="howto_step4_desc">L'aereo segue la rotta reale in automatico: usa Pausa, Mappa/Satellite e Segui Aereo per esplorare.</span></div></li>
+                <li><i class="fa-solid fa-gauge-high"></i> <div><b data-translate="howto_step5_title">5. Controlla i dati</b><br><span style="font-size:0.85rem; color:#94a3b8" data-translate="howto_step5_desc">Tieni d'occhio altitudine, velocità, meteo e tempo di arrivo (ETA) nei pannelli in alto.</span></div></li>
+                <li><i class="fa-solid fa-spa"></i> <div><b data-translate="howto_step6_title">6. Rilassati</b><br><span style="font-size:0.85rem; color:#94a3b8" data-translate="howto_step6_desc">Non c'è nessun obiettivo da raggiungere: siediti e goditi il panorama in tempo reale.</span></div></li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="feedback-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeFeedbackModal()">&times;</button>
+            <div class="modal-title">
+                <i class="fa-solid fa-comment-dots"></i> <span data-translate="feedback_title">Invia un Feedback</span>
+            </div>
+            <p class="feedback-desc" data-translate="feedback_desc">Scrivi un suggerimento, un bug o un pensiero. Il messaggio verrà inviato in forma anonima al creatore del gioco: nessun dato personale viene raccolto o condiviso.</p>
+            <textarea id="feedback-text" class="feedback-textarea" rows="5" data-translate-placeholder="feedback_placeholder" placeholder="Scrivi qui il tuo feedback..."></textarea>
+            <button class="btn btn-primary" id="feedback-send-btn" onclick="sendFeedback()" style="margin-top: 1rem; width: 100%;">
+                <i class="fa-solid fa-paper-plane"></i> <span data-translate="feedback_send">Invia Anonimamente</span>
+            </button>
+            <div id="feedback-status" class="feedback-status"></div>
         </div>
     </div>
 
@@ -827,8 +933,8 @@
                 <div class="volume-row">
                     <div class="icon-btn" style="cursor:default;"><i class="fa-solid fa-bell"></i></div>
                     <div class="volume-row-label">
-                        <div class="vr-title"><span data-translate="settings_sfx">Effetti sonori</span> <span class="vr-value" id="sfx-vol-label">80%</span></div>
-                        <input type="range" id="sfx-volume" min="0" max="100" value="80" oninput="setSfxVolume(this.value)">
+                        <div class="vr-title"><span data-translate="settings_sfx">Effetti sonori</span> <span class="vr-value" id="sfx-vol-label">100%</span></div>
+                        <input type="range" id="sfx-volume" min="0" max="100" value="100" oninput="setSfxVolume(this.value)">
                     </div>
                 </div>
             </div>
@@ -846,6 +952,66 @@
                 </button>
                 <button class="btn btn-primary" onclick="closeSettingsModal()">
                     <i class="fa-solid fa-check"></i> <span data-translate="settings_close">Chiudi</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="stats-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeStatsModal()">&times;</button>
+            <div class="modal-title">
+                <i class="fa-solid fa-chart-simple"></i> <span data-translate="stats_title">Statistiche</span>
+            </div>
+
+            <div class="settings-section">
+                <div class="stat-row">
+                    <div class="stat-row-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+                    <div class="stat-row-label"><span data-translate="stats_total_time">Tempo Totale in Gioco</span><b id="stat-total-time">0m</b></div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-row-icon"><i class="fa-solid fa-plane"></i></div>
+                    <div class="stat-row-label"><span data-translate="stats_played_time">Tempo Totale Giocato</span><b id="stat-played-time">0m</b></div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-row-icon"><i class="fa-solid fa-flag-checkered"></i></div>
+                    <div class="stat-row-label"><span data-translate="stats_flights_done">Voli Conclusi</span><b id="stat-flights-done">0</b></div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-row-icon"><i class="fa-solid fa-route"></i></div>
+                    <div class="stat-row-label"><span data-translate="stats_total_distance">Distanza Totale Percorsa</span><b id="stat-total-distance">0 km</b></div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-row-icon"><i class="fa-solid fa-arrow-up-long"></i></div>
+                    <div class="stat-row-label"><span data-translate="stats_longest_flight">Volo Più Lungo</span><b id="stat-longest-flight">—</b></div>
+                </div>
+            </div>
+
+            <div class="settings-btn-row">
+                <button class="btn btn-outline" onclick="askResetStats()">
+                    <i class="fa-solid fa-rotate-left"></i> <span data-translate="stats_reset">Reimposta</span>
+                </button>
+                <button class="btn btn-primary" onclick="closeStatsModal()">
+                    <i class="fa-solid fa-check"></i> <span data-translate="settings_close">Chiudi</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="stats-reset-confirm-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width:380px; text-align:center;">
+            <div class="modal-title" style="justify-content:center; color: var(--danger);">
+                <i class="fa-solid fa-triangle-exclamation"></i> <span data-translate="stats_reset_confirm_title">Confermi il reset?</span>
+            </div>
+            <p style="color: var(--text-muted); font-size:0.9rem; margin: 0.5rem 0 1.5rem 0; line-height:1.5;" data-translate="stats_reset_confirm_msg">
+                Questa azione cancellerà definitivamente tutte le statistiche di gioco. L'operazione non può essere annullata.
+            </p>
+            <div class="settings-btn-row">
+                <button class="btn btn-outline" onclick="closeResetStatsConfirm()">
+                    <i class="fa-solid fa-xmark"></i> <span data-translate="stats_reset_cancel">Annulla</span>
+                </button>
+                <button class="btn" id="stats-reset-confirm-btn" onclick="confirmResetStats()" style="background: var(--danger); color:#fff; box-shadow: 0 4px 20px rgba(239,68,68,0.35);">
+                    <i class="fa-solid fa-trash"></i> <span data-translate="stats_reset_confirm_btn">Conferma</span>
                 </button>
             </div>
         </div>
@@ -894,7 +1060,6 @@
             </div>
             <div class="cabin-nose"><i class="fa-solid fa-plane-up"></i> <span data-translate="seat_front">Fronte Cabina</span></div>
             <div class="seat-map-scroll"><div id="seat-grid" class="seat-grid"></div></div>
-            <div class="cabin-tail" data-translate="seat_rear">Retro Cabina</div>
             <button class="btn btn-primary" id="confirm-seat-btn" onclick="confirmSeatSelection()" disabled>
                 <i class="fa-solid fa-ticket"></i> <span data-translate="seat_confirm">Conferma e Imbarca</span>
             </button>
@@ -925,7 +1090,6 @@
                         <div><label data-translate="bp_aircraft">Aereo</label><span id="bp-aircraft">—</span></div>
                         <div><label data-translate="bp_gate">Gate</label><span id="bp-gate">—</span></div>
                         <div><label data-translate="bp_seat">Posto</label><span id="bp-seat">—</span></div>
-                        <div><label data-translate="bp_date">Data</label><span id="bp-date">—</span></div>
                         <div><label data-translate="bp_boarding">Imbarco</label><span id="bp-boarding">—</span></div>
                     </div>
                 </div>
@@ -933,6 +1097,9 @@
                     <div class="bp-barcode"></div>
                     <div class="bp-stub-seat" id="bp-stub-seat">—</div>
                 </div>
+            </div>
+            <div id="bp-tear-hint" style="margin-top:1.4rem; color: var(--text-muted); font-size:0.85rem; display:none; align-items:center; justify-content:center; gap:8px;">
+                <i class="fa-solid fa-hand-pointer" style="color:var(--primary);"></i> <span data-translate="bp_tear_hint">Trascina lo stub per strappare il biglietto</span>
             </div>
             <button class="btn btn-primary" id="bp-continue-btn" onclick="closeBoardingPass()" style="display:none;">
                 <i class="fa-solid fa-paper-plane"></i> <span data-translate="bp_continue">Decolla!</span>
@@ -944,6 +1111,9 @@
         <div style="display:flex; gap:8px;">
             <button class="icon-btn spin-hover" onclick="openSettingsModal()" title="Impostazioni">
                 <i class="fa-solid fa-gear"></i>
+            </button>
+            <button class="icon-btn" id="ingame-stats-btn" onclick="openStatsModal()" title="Statistiche">
+                <i class="fa-solid fa-chart-simple"></i>
             </button>
             <button class="lang-btn" id="fullscreen-btn" onclick="toggleFullscreen()" title="Schermo Intero">
                 <i class="fa-solid fa-expand" id="fullscreen-icon"></i> <span id="fullscreen-text">Schermo Intero</span>
@@ -974,8 +1144,7 @@
         <div class="speed-controls">
             <button class="speed-btn active" onclick="setSpeed(1)">1x</button>
             <button class="speed-btn" onclick="setSpeed(5)">5x</button>
-            <button class="speed-btn" onclick="setSpeed(10)">10x</button>
-            <button class="speed-btn" onclick="setSpeed(50)" style="color:var(--danger)">50x</button>
+            <button class="speed-btn" onclick="setSpeed(10)" style="color:var(--danger)">10x</button>
         </div>
 
         <div class="env-info-panel" id="env-panel">
@@ -1046,16 +1215,16 @@
             <div class="control-group">
                 <label data-translate="airline">Compagnia Aerea</label>
                 <div class="select-wrapper">
-                    <select id="airline-select">
-                        <option value="RYR">Ryanair (FR)</option>
+                    <select id="airline-select" onchange="updateAirlineSelectColor(this.value)">
+                        <option value="AFR">Air France (AF)</option>
+                        <option value="AAL">American Airlines (AA)</option>
+                        <option value="BAW">British Airways (BA)</option>
+                        <option value="DAL">Delta Air Lines (DL)</option>
                         <option value="EZY">EasyJet (U2)</option>
+                        <option value="UAE">Emirates (EK)</option>
                         <option value="ITY">ITA Airways (AZ)</option>
                         <option value="DLH">Lufthansa (LH)</option>
-                        <option value="AFR">Air France (AF)</option>
-                        <option value="BAW">British Airways (BA)</option>
-                        <option value="UAE">Emirates (EK)</option>
-                        <option value="AAL">American Airlines (AA)</option>
-                        <option value="DAL">Delta Air Lines (DL)</option>
+                        <option value="RYR">Ryanair (FR)</option>
                         <option value="WZZ">Wizz Air (W6)</option>
                     </select>
                 </div>
@@ -1065,20 +1234,15 @@
                 <label data-translate="aircraft">Aeromobile</label>
                 <div class="select-wrapper">
                     <select id="aircraft-type">
-                        <option value="A320">Airbus A320 (Medio Raggio)</option>
-                        <option value="B787">Boeing 787 Dreamliner (Lungo Raggio)</option>
-                        <option value="C172">Cessna 172 (Turistico - Lento)</option>
-                        <option value="CONC">Concorde (Supersonico)</option>
-                        <option value="B747">Boeing 747-8 "Queen of Skies"</option>
-                        <option value="A380">Airbus A380 "Superjumbo"</option>
-                        <option value="B737">Boeing 737 (Corto Raggio)</option>
-                        <option value="A350">Airbus A350 XWB</option>
-                        <option value="E190">Embraer E190 (Regionale)</option>
-                        <option value="G7500">Bombardier Global 7500 (Privato)</option>
-                        <option value="F22">F-22 Raptor (Caccia Militare)</option>
-                        <option value="AN225">Antonov An-225 "Mriya" (Cargo)</option>
-                        <option value="SPIT">Supermarine Spitfire (Storico)</option>
-                        <option value="PC12">Pilatus PC-12 (Turboelica)</option>
+                        <option value="A318">Airbus A318</option>
+                        <option value="A319">Airbus A319</option>
+                        <option value="A320">Airbus A320</option>
+                        <option value="A321">Airbus A321</option>
+                        <option value="A330">Airbus A330</option>
+                        <option value="A350">Airbus A350</option>
+                        <option value="B737">Boeing 737</option>
+                        <option value="B777">Boeing 777</option>
+                        <option value="B787">Boeing 787 Dreamliner</option>
                     </select>
                 </div>
             </div>
@@ -1086,7 +1250,7 @@
             <div class="random-row-header">
                 <label style="margin:0" data-translate="route_plan">Piano di Volo</label>
                 <button class="random-btn" onclick="randomizeRoute()" title="Rotta Casuale">
-                    <i class="fa-solid fa-dice"></i> Random
+                    <i class="fa-solid fa-dice"></i>
                 </button>
             </div>
 
@@ -1128,11 +1292,9 @@
                 status_gate: "Al Gate", status_takeoff: "DECOLLO", status_landing: "ATTERRAGGIO", status_cruise: "CROCIERA",
                 status_meal: "SERVIZIO PASTI", status_systems: "CONTROLLO SISTEMI", status_cancelled: "ANNULLATO", status_arrived: "ARRIVATO",
                 eta_prefix: "Arrivo in: ", eta_landing_soon: "In atterraggio...", eta_landing_now: "Atterraggio in corso...",
-                ac_a320: "Airbus A320 (Medio Raggio)", ac_b787: "Boeing 787 Dreamliner (Lungo Raggio)", ac_c172: "Cessna 172 (Turistico - Lento)",
-                ac_conc: "Concorde (Supersonico)", ac_b747: "Boeing 747-8 \"Queen of Skies\"", ac_a380: "Airbus A380 \"Superjumbo\"",
-                ac_b737: "Boeing 737 (Corto Raggio)", ac_a350: "Airbus A350 XWB", ac_e190: "Embraer E190 (Regionale)",
-                ac_g7500: "Bombardier Global 7500 (Privato)", ac_f22: "F-22 Raptor (Caccia Militare)", ac_an225: "Antonov An-225 \"Mriya\" (Cargo)",
-                ac_spit: "Supermarine Spitfire (Storico)", ac_pc12: "Pilatus PC-12 (Turboelica)",
+                ac_a318: "Airbus A318", ac_a319: "Airbus A319", ac_a320: "Airbus A320", ac_a321: "Airbus A321",
+                ac_a330: "Airbus A330", ac_a350: "Airbus A350", ac_b737: "Boeing 737", ac_b777: "Boeing 777",
+                ac_b787: "Boeing 787 Dreamliner",
                 pause: "Pausa", resume: "Riprendi", map_view: "Mappa", sat_view: "Satellite",
                 news_title: "Novità v1.0", news_airlines: "Compagnie Aeree", news_liveries: "Nuove livree",
                 news_rotation: "Supporto Mobile", news_fixes: "Bug Fixes", news_world: "Mondo Espanso", news_expansion: "+130 Aeroporti internazionali",
@@ -1148,7 +1310,29 @@
                 seat_title: "Seleziona il tuo Posto", seat_free: "Libero", seat_taken: "Occupato", seat_selected: "Selezionato",
                 seat_front: "Fronte Cabina", seat_rear: "Retro Cabina",
                 seat_confirm: "Conferma e Imbarca", bp_flight: "Volo", bp_aircraft: "Aereo", bp_gate: "Gate",
-                bp_seat: "Posto", bp_date: "Data", bp_boarding: "Imbarco", bp_stamp: "IMBARCATO", bp_continue: "Decolla!"
+                bp_seat: "Posto", bp_date: "Data", bp_boarding: "Imbarco", bp_stamp: "IMBARCATO", bp_continue: "Decolla!",
+                stats_btn: "Statistiche", stats_title: "Statistiche",
+                stats_total_time: "Tempo Totale in Gioco", stats_played_time: "Tempo Totale Giocato",
+                stats_flights_done: "Voli Conclusi", stats_total_distance: "Distanza Totale Percorsa",
+                stats_longest_flight: "Volo Più Lungo", stats_reset: "Reimposta",
+                stats_reset_confirm_title: "Confermi il reset?",
+                stats_reset_confirm_msg: "Questa azione cancellerà definitivamente tutte le statistiche di gioco. L'operazione non può essere annullata.",
+                stats_reset_confirm_btn: "Conferma", stats_reset_cancel: "Annulla",
+                stats_fab: "Statistiche", bp_tear_hint: "Trascina lo stub per strappare il biglietto",
+                howto_btn: "Come si gioca?", howto_title: "Come si gioca?",
+                howto_step1_title: "1. Scegli la rotta", howto_step1_desc: "Seleziona aeroporto di partenza e destinazione dal pannello laterale.",
+                howto_step2_title: "2. Personalizza il volo", howto_step2_desc: "Scegli compagnia aerea e aeromobile, poi premi Decolla.",
+                howto_step3_title: "3. Scegli il posto", howto_step3_desc: "Seleziona un posto sulla mappa cabina per ricevere la tua carta d'imbarco.",
+                howto_step4_title: "4. Goditi il volo", howto_step4_desc: "L'aereo segue la rotta reale in automatico: usa Pausa, Mappa/Satellite e Segui Aereo per esplorare.",
+                howto_step5_title: "5. Controlla i dati", howto_step5_desc: "Tieni d'occhio altitudine, velocità, meteo e tempo di arrivo (ETA) nei pannelli in alto.",
+                howto_step6_title: "6. Rilassati", howto_step6_desc: "Non c'è nessun obiettivo da raggiungere: siediti e goditi il panorama in tempo reale.",
+                feedback_title: "Invia un Feedback", feedback_send: "Invia Anonimamente",
+                feedback_desc: "Scrivi un suggerimento, un bug o un pensiero. Il messaggio verrà inviato in forma anonima al creatore del gioco: nessun dato personale viene raccolto o condiviso.",
+                feedback_placeholder: "Scrivi qui il tuo feedback...",
+                feedback_empty: "Scrivi un messaggio prima di inviare.",
+                feedback_sending: "Invio in corso...",
+                feedback_success: "Grazie! Il tuo feedback è stato inviato in modo anonimo.",
+                feedback_error: "Invio non riuscito. Riprova più tardi."
             },
             en: {
                 local_time: "Local Time", weather_dest: "Weather", flight_data: "Flight Data",
@@ -1159,11 +1343,9 @@
                 status_gate: "At Gate", status_takeoff: "TAKEOFF", status_landing: "LANDING", status_cruise: "CRUISE",
                 status_meal: "MEAL SERVICE", status_systems: "SYSTEMS CHECK", status_cancelled: "CANCELLED", status_arrived: "ARRIVED",
                 eta_prefix: "Arriving in: ", eta_landing_soon: "Landing...", eta_landing_now: "Landing in progress...",
-                ac_a320: "Airbus A320 (Medium Range)", ac_b787: "Boeing 787 Dreamliner (Long Range)", ac_c172: "Cessna 172 (Tourist - Slow)",
-                ac_conc: "Concorde (Supersonic)", ac_b747: "Boeing 747-8 \"Queen of Skies\"", ac_a380: "Airbus A380 \"Superjumbo\"",
-                ac_b737: "Boeing 737 (Short Range)", ac_a350: "Airbus A350 XWB", ac_e190: "Embraer E190 (Regional)",
-                ac_g7500: "Bombardier Global 7500 (Private)", ac_f22: "F-22 Raptor (Fighter Jet)", ac_an225: "Antonov An-225 \"Mriya\" (Cargo)",
-                ac_spit: "Supermarine Spitfire (Historic)", ac_pc12: "Pilatus PC-12 (Turboprop)",
+                ac_a318: "Airbus A318", ac_a319: "Airbus A319", ac_a320: "Airbus A320", ac_a321: "Airbus A321",
+                ac_a330: "Airbus A330", ac_a350: "Airbus A350", ac_b737: "Boeing 737", ac_b777: "Boeing 777",
+                ac_b787: "Boeing 787 Dreamliner",
                 pause: "Pause", resume: "Resume", map_view: "Map", sat_view: "Satellite",
                 news_title: "News v1.0", news_airlines: "New Airlines", news_liveries: "New liveries",
                 news_rotation: "Mobile Support", news_fixes: "Bug Fixes", news_world: "World Expanded", news_expansion: "+130 International Airports",
@@ -1179,7 +1361,29 @@
                 seat_title: "Choose your Seat", seat_free: "Free", seat_taken: "Taken", seat_selected: "Selected",
                 seat_front: "Cabin Front", seat_rear: "Cabin Rear",
                 seat_confirm: "Confirm and Board", bp_flight: "Flight", bp_aircraft: "Aircraft", bp_gate: "Gate",
-                bp_seat: "Seat", bp_date: "Date", bp_boarding: "Boarding", bp_stamp: "BOARDED", bp_continue: "Take Off!"
+                bp_seat: "Seat", bp_date: "Date", bp_boarding: "Boarding", bp_stamp: "BOARDED", bp_continue: "Take Off!",
+                stats_btn: "Statistics", stats_title: "Statistics",
+                stats_total_time: "Total Time in Game", stats_played_time: "Total Time Played",
+                stats_flights_done: "Flights Completed", stats_total_distance: "Total Distance Traveled",
+                stats_longest_flight: "Longest Flight", stats_reset: "Reset",
+                stats_reset_confirm_title: "Confirm reset?",
+                stats_reset_confirm_msg: "This action will permanently delete all game statistics. This cannot be undone.",
+                stats_reset_confirm_btn: "Confirm", stats_reset_cancel: "Cancel",
+                stats_fab: "Statistics", bp_tear_hint: "Drag the stub to tear the ticket",
+                howto_btn: "How to play?", howto_title: "How to play?",
+                howto_step1_title: "1. Choose your route", howto_step1_desc: "Select departure and destination airport from the side panel.",
+                howto_step2_title: "2. Customize your flight", howto_step2_desc: "Choose airline and aircraft, then press Take Off.",
+                howto_step3_title: "3. Pick your seat", howto_step3_desc: "Select a seat on the cabin map to get your boarding pass.",
+                howto_step4_title: "4. Enjoy the flight", howto_step4_desc: "The plane follows the real route automatically: use Pause, Map/Satellite and Follow Plane to explore.",
+                howto_step5_title: "5. Check the data", howto_step5_desc: "Keep an eye on altitude, speed, weather and estimated arrival time (ETA) in the top panels.",
+                howto_step6_title: "6. Relax", howto_step6_desc: "There's no goal to reach: sit back and enjoy the real-time scenery.",
+                feedback_title: "Send Feedback", feedback_send: "Send Anonymously",
+                feedback_desc: "Write a suggestion, a bug report or a thought. Your message will be sent anonymously to the game's creator: no personal data is collected or shared.",
+                feedback_placeholder: "Write your feedback here...",
+                feedback_empty: "Write a message before sending.",
+                feedback_sending: "Sending...",
+                feedback_success: "Thank you! Your feedback was sent anonymously.",
+                feedback_error: "Sending failed. Please try again later."
             }
         };
 
@@ -1228,17 +1432,19 @@
                 const key = el.getAttribute('data-translate');
                 if (t[key]) el.innerText = t[key];
             });
+            document.querySelectorAll('[data-translate-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-translate-placeholder');
+                if (t[key]) el.placeholder = t[key];
+            });
             if (document.getElementById('hide-ui-modal') && document.getElementById('hide-ui-modal').classList.contains('open')) {
                 buildHideUiList();
             }
             const acSelect = document.getElementById('aircraft-type');
-            acSelect.options[0].text = t.ac_a320; acSelect.options[1].text = t.ac_b787;
-            acSelect.options[2].text = t.ac_c172; acSelect.options[3].text = t.ac_conc;
-            acSelect.options[4].text = t.ac_b747; acSelect.options[5].text = t.ac_a380;
-            acSelect.options[6].text = t.ac_b737; acSelect.options[7].text = t.ac_a350;
-            acSelect.options[8].text = t.ac_e190; acSelect.options[9].text = t.ac_g7500;
-            acSelect.options[10].text = t.ac_f22; acSelect.options[11].text = t.ac_an225;
-            acSelect.options[12].text = t.ac_spit; acSelect.options[13].text = t.ac_pc12;
+            acSelect.options[0].text = t.ac_a318; acSelect.options[1].text = t.ac_a319;
+            acSelect.options[2].text = t.ac_a320; acSelect.options[3].text = t.ac_a321;
+            acSelect.options[4].text = t.ac_a330; acSelect.options[5].text = t.ac_a350;
+            acSelect.options[6].text = t.ac_b737; acSelect.options[7].text = t.ac_b777;
+            acSelect.options[8].text = t.ac_b787;
 
             if(!flightInterval) {
                  document.getElementById('fly-btn-text').innerText = t.takeoff;
@@ -1315,17 +1521,28 @@
             let landingChimePlayed = false;
 
             let musicVol = parseFloat(localStorage.getItem('rfx_musicVol'));
-            if (isNaN(musicVol)) musicVol = 0.7;
+            if (isNaN(musicVol)) musicVol = 1.0;
             let sfxVol = parseFloat(localStorage.getItem('rfx_sfxVol'));
-            if (isNaN(sfxVol)) sfxVol = 0.8;
+            if (isNaN(sfxVol)) sfxVol = 1.0;
             let muted = localStorage.getItem('rfx_muted') === 'true';
 
             function ensureCtx() {
                 if (ctx) return;
                 ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+                // Limiter finale: con il volume generale alzato di molto, questo compressore
+                // evita distorsioni/clipping quando più suoni si sovrappongono.
+                const limiter = ctx.createDynamicsCompressor();
+                limiter.threshold.value = -6;
+                limiter.knee.value = 12;
+                limiter.ratio.value = 16;
+                limiter.attack.value = 0.002;
+                limiter.release.value = 0.15;
+                limiter.connect(ctx.destination);
+
                 masterGain = ctx.createGain();
-                masterGain.gain.value = muted ? 0 : 1;
-                masterGain.connect(ctx.destination);
+                masterGain.gain.value = muted ? 0 : 4.6;
+                masterGain.connect(limiter);
 
                 musicGain = ctx.createGain();
                 musicGain.gain.value = musicVol;
@@ -1535,7 +1752,7 @@
             function setSfxVolume(v) { sfxVol = v; if (sfxGain) sfxGain.gain.value = v; localStorage.setItem('rfx_sfxVol', v); }
             function setMuted(m) {
                 muted = m;
-                if (masterGain) masterGain.gain.value = m ? 0 : 1;
+                if (masterGain) masterGain.gain.value = m ? 0 : 4.6;
                 localStorage.setItem('rfx_muted', m);
             }
             function getState() { return { musicVol, sfxVol, muted }; }
@@ -1700,6 +1917,7 @@
             document.addEventListener('keydown', startAudioOnce);
 
             setTimeout(() => { document.getElementById('main-menu').classList.add('visible'); }, 100);
+            updateAirlineSelectColor(document.getElementById('airline-select').value);
             initBgMap();
             
             // --- MOBILE SIDEBAR SWIPE LOGIC ---
@@ -1801,6 +2019,62 @@
             setTimeout(() => { uiElements.forEach(el => el.classList.add('visible')); attachUISounds(); }, 500);
         }
         function toggleNewsModal() { document.getElementById('news-modal').classList.toggle('open'); }
+
+        // --- HOW TO PLAY MODAL ---
+        function openHowToPlayModal() { document.getElementById('howto-modal').classList.add('open'); }
+        function closeHowToPlayModal() { document.getElementById('howto-modal').classList.remove('open'); }
+
+        // --- FEEDBACK MODAL (invio anonimo via FormSubmit) ---
+        function openFeedbackModal() { document.getElementById('feedback-modal').classList.add('open'); }
+        function closeFeedbackModal() {
+            document.getElementById('feedback-modal').classList.remove('open');
+            const statusEl = document.getElementById('feedback-status');
+            statusEl.innerText = '';
+            statusEl.className = 'feedback-status';
+        }
+
+        async function sendFeedback() {
+            const t = translations[currentLang];
+            const textEl = document.getElementById('feedback-text');
+            const statusEl = document.getElementById('feedback-status');
+            const btn = document.getElementById('feedback-send-btn');
+            const text = textEl.value.trim();
+
+            if (!text) {
+                statusEl.innerText = t.feedback_empty;
+                statusEl.className = 'feedback-status error';
+                return;
+            }
+
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${t.feedback_sending}`;
+            statusEl.innerText = '';
+            statusEl.className = 'feedback-status';
+
+            try {
+                const res = await fetch('https://formsubmit.co/ajax/manuelminnocci6@gmail.com', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({
+                        _subject: 'RelaxFlightX - Nuovo Feedback Anonimo',
+                        _template: 'table',
+                        _captcha: 'false',
+                        Messaggio: text
+                    })
+                });
+                if (!res.ok) throw new Error('network error');
+                statusEl.innerText = t.feedback_success;
+                statusEl.className = 'feedback-status success';
+                textEl.value = '';
+            } catch (err) {
+                statusEl.innerText = t.feedback_error;
+                statusEl.className = 'feedback-status error';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        }
 
         // --- UPDATED AIRPORTS ARRAY WITH ENGLISH NAMES ---
         const airports = [
@@ -2036,12 +2310,103 @@
             }
         }
 
+        // --- OROLOGIO DI GIOCO UNIFICATO ---
+        // Un unico "tempo di gioco" (in minuti UTC simulati), generato in modo casuale
+        // ad ogni refresh della pagina, usato sia dal biglietto d'imbarco che dall'ora
+        // locale mostrata durante il volo, cosi' restano sempre coerenti tra loro.
+        const gameClockStartRealMs = Date.now();
+        const gameClockStartUTCMin = Math.floor(Math.random() * 1440); // randomizzato ad ogni refresh
+        function getGameUTCMinutes() {
+            const elapsedMin = (Date.now() - gameClockStartRealMs) / 60000;
+            return (gameClockStartUTCMin + elapsedMin + 1440 * 1000) % 1440;
+        }
+        // Ora locale simulata (in minuti dalla mezzanotte) per una data longitudine,
+        // basata sull'orologio di gioco unico condiviso da biglietto e volo.
+        function getGameLocalMinutes(lon) {
+            const offset = Math.round(lon / 15);
+            return (getGameUTCMinutes() + (offset * 60) + 1440 * 1000) % 1440;
+        }
+
         let selectedSeat = null;
         let pendingFlightNo = null, pendingGate = null, pendingAircraftType = null, pendingAirlineType = null;
         let pendingDep = null, pendingArr = null;
         let planeMarker = null, routeLine = null, flightInterval = null;
         let isLanding = false, landingZoomInterval = null, landingZoomLevel = 12;
         let departureMarker = null, arrivalMarker = null;
+        let currentFlightDistanceKm = 0;
+
+        // --- STATISTICHE DI GIOCO (persistenti su localStorage) ---
+        const STATS_KEY = 'rfx_stats';
+        function loadStats() {
+            try {
+                const raw = localStorage.getItem(STATS_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    return {
+                        totalAppTimeMs: parsed.totalAppTimeMs || 0,
+                        totalFlightTimeMs: parsed.totalFlightTimeMs || 0,
+                        flightsCompleted: parsed.flightsCompleted || 0,
+                        totalDistanceKm: parsed.totalDistanceKm || 0,
+                        longestFlightKm: parsed.longestFlightKm || 0
+                    };
+                }
+            } catch (e) {}
+            return { totalAppTimeMs: 0, totalFlightTimeMs: 0, flightsCompleted: 0, totalDistanceKm: 0, longestFlightKm: 0 };
+        }
+        let gameStats = loadStats();
+        function saveStats() {
+            try { localStorage.setItem(STATS_KEY, JSON.stringify(gameStats)); } catch (e) {}
+        }
+        let statsSessionMark = Date.now();
+        setInterval(() => {
+            const now = Date.now();
+            gameStats.totalAppTimeMs += (now - statsSessionMark);
+            statsSessionMark = now;
+            if (flightInterval && !isPaused) gameStats.totalFlightTimeMs += 1000;
+            saveStats();
+        }, 1000);
+        window.addEventListener('beforeunload', saveStats);
+
+        function formatStatsDuration(ms) {
+            const totalMinutes = Math.floor(ms / 60000);
+            const h = Math.floor(totalMinutes / 60);
+            const m = totalMinutes % 60;
+            if (h > 0) return `${h}h ${m}m`;
+            if (m > 0) return `${m}m`;
+            return `${Math.floor(ms / 1000)}s`;
+        }
+        function formatStatsDistance(km) {
+            return `${Math.round(km).toLocaleString(currentLang === 'it' ? 'it-IT' : 'en-US')} km`;
+        }
+        function openStatsModal() {
+            SoundManager.resume();
+            SoundManager.playClick();
+            document.getElementById('stat-total-time').innerText = formatStatsDuration(gameStats.totalAppTimeMs);
+            document.getElementById('stat-played-time').innerText = formatStatsDuration(gameStats.totalFlightTimeMs);
+            document.getElementById('stat-flights-done').innerText = gameStats.flightsCompleted.toLocaleString(currentLang === 'it' ? 'it-IT' : 'en-US');
+            document.getElementById('stat-total-distance').innerText = formatStatsDistance(gameStats.totalDistanceKm);
+            document.getElementById('stat-longest-flight').innerText = gameStats.longestFlightKm > 0 ? formatStatsDistance(gameStats.longestFlightKm) : '—';
+            document.getElementById('stats-modal').classList.add('open');
+        }
+        function closeStatsModal() {
+            SoundManager.playClick();
+            document.getElementById('stats-modal').classList.remove('open');
+        }
+        function askResetStats() {
+            SoundManager.playClick();
+            document.getElementById('stats-reset-confirm-modal').classList.add('open');
+        }
+        function closeResetStatsConfirm() {
+            SoundManager.playClick();
+            document.getElementById('stats-reset-confirm-modal').classList.remove('open');
+        }
+        function confirmResetStats() {
+            SoundManager.playClick();
+            gameStats = { totalAppTimeMs: 0, totalFlightTimeMs: 0, flightsCompleted: 0, totalDistanceKm: 0, longestFlightKm: 0 };
+            saveStats();
+            document.getElementById('stats-reset-confirm-modal').classList.remove('open');
+            openStatsModal();
+        }
 
         // --- NEW: TRAVELED LINE VARIABLE ---
         let traveledLine = null;
@@ -2094,11 +2459,15 @@
             }
         }
 
-        const createPlaneIcon = (rotation) => L.divIcon({
-            className: 'plane-icon-wrapper',
-            html: `<i class="fa-solid fa-plane" style="display:block; font-size: 32px; color: var(--primary); transform: rotate(${rotation - 90}deg); filter: drop-shadow(0 4px 10px rgba(0,0,0,0.8)); text-shadow: 0 0 10px var(--primary);"></i>`,
-            iconSize: [32, 32], iconAnchor: [16, 16]
-        });
+        let currentPlaneColor = '#38bdf8';
+        const createPlaneIcon = (rotation, color) => {
+            const c = color || currentPlaneColor || '#38bdf8';
+            return L.divIcon({
+                className: 'plane-icon-wrapper',
+                html: `<i class="fa-solid fa-plane" style="display:block; font-size: 34px; color: ${c}; transform: rotate(${rotation - 90}deg); filter: saturate(2.2) brightness(1.4) drop-shadow(0 4px 10px rgba(0,0,0,0.8)) drop-shadow(0 0 6px ${c}) drop-shadow(0 0 16px ${c}); text-shadow: 0 0 8px ${c}, 0 0 18px ${c}, 0 0 32px ${c};"></i>`,
+                iconSize: [34, 34], iconAnchor: [17, 17]
+            });
+        };
         const createAirportMarker = (color) => L.divIcon({
             className: 'airport-dot',
             html: `<div style="width:14px; height:14px; background:${color}; border-radius:50%; border:2px solid white; box-shadow:0 0 10px ${color};"></div><div class="pulse-ring" style="border-color:${color}"></div>`,
@@ -2150,20 +2519,25 @@
             bp.style.setProperty('--bp-stub-bg2', th.stub2);
         }
 
+        // --- SFONDO SELECT COMPAGNIA AEREA: colore diverso per ogni compagnia ---
+        function updateAirlineSelectColor(airlineType) {
+            const th = airlineTheme[airlineType] || { primary: '#38bdf8' };
+            const sel = document.getElementById('airline-select');
+            if (!sel) return;
+            sel.style.background = `linear-gradient(135deg, ${th.primary}55, ${th.primary}1f)`;
+            sel.style.borderColor = `${th.primary}aa`;
+        }
+
         // --- SEAT MAP CONFIGURATION PER AIRCRAFT ---
         function getSeatConfig(type) {
             switch (type) {
-                case 'F22': return { rows: 1, cols: ['A'] };
-                case 'SPIT': return { rows: 1, cols: ['A'] };
-                case 'C172': return { rows: 2, cols: ['A', 'B'] };
-                case 'G7500': return { rows: 4, cols: ['A', 'B'] };
-                case 'PC12': return { rows: 3, cols: ['A', 'B', 'C'] };
-                case 'AN225': return { rows: 2, cols: ['A', 'B', 'C'] };
-                case 'E190': return { rows: 17, cols: ['A', 'B', 'C', 'D'] };
-                case 'CONC': return { rows: 10, cols: ['A', 'B', 'C', 'D'] };
+                case 'A318': return { rows: 20, cols: ['A', 'B', 'C', 'D', 'E', 'F'] };
+                case 'A319': return { rows: 22, cols: ['A', 'B', 'C', 'D', 'E', 'F'] };
                 case 'A320': case 'B737': return { rows: 26, cols: ['A', 'B', 'C', 'D', 'E', 'F'] };
+                case 'A321': return { rows: 30, cols: ['A', 'B', 'C', 'D', 'E', 'F'] };
+                case 'A330': return { rows: 32, cols: ['A', 'B', 'C', 'D', 'E', 'F'] };
                 case 'B787': case 'A350': return { rows: 30, cols: ['A', 'B', 'C', 'D', 'E', 'F'] };
-                case 'B747': case 'A380': return { rows: 34, cols: ['A', 'B', 'C', 'D', 'E', 'F'] };
+                case 'B777': return { rows: 34, cols: ['A', 'B', 'C', 'D', 'E', 'F'] };
                 default: return { rows: 20, cols: ['A', 'B', 'C', 'D', 'E', 'F'] };
             }
         }
@@ -2261,10 +2635,12 @@
             const aircraftLabel = aircraftSelect.options[aircraftSelect.selectedIndex].text;
             const airlineLabel = airlineSelect.options[airlineSelect.selectedIndex].text;
 
-            const now = new Date();
-            const dateStr = now.toLocaleDateString(currentLang === 'it' ? 'it-IT' : 'en-GB');
-            const boardTime = new Date(now.getTime() + 20 * 60000);
-            const boardStr = boardTime.getHours().toString().padStart(2, '0') + ':' + boardTime.getMinutes().toString().padStart(2, '0');
+            // Ora di imbarco calcolata sul tempo di gioco (ora locale simulata all'aeroporto
+            // di partenza, in base alla longitudine), non sull'orario reale del dispositivo.
+            // Usa lo stesso orologio di gioco condiviso con l'ora locale mostrata in volo,
+            // cosi' l'orario sul biglietto coincide con quello che si vedra' al decollo.
+            const boardTotalMin = getGameLocalMinutes(dep.lon);
+            const boardStr = Math.floor(boardTotalMin / 60).toString().padStart(2, '0') + ':' + (Math.floor(boardTotalMin % 60)).toString().padStart(2, '0');
 
             applyAirlineTheme(pendingAirlineType);
 
@@ -2278,18 +2654,74 @@
             document.getElementById('bp-gate').textContent = pendingGate;
             document.getElementById('bp-seat').textContent = selectedSeat;
             document.getElementById('bp-stub-seat').textContent = selectedSeat;
-            document.getElementById('bp-date').textContent = dateStr;
             document.getElementById('bp-boarding').textContent = boardStr;
 
             const bp = document.getElementById('boarding-pass');
-            bp.classList.remove('filled', 'torn');
+            const stub = document.getElementById('bp-stub');
+            bp.classList.remove('filled', 'torn', 'tear-ready');
+            stub.style.transform = '';
             document.getElementById('bp-continue-btn').style.display = 'none';
+            document.getElementById('bp-tear-hint').style.display = 'none';
 
             document.getElementById('boarding-pass-modal').classList.add('open');
 
-            setTimeout(() => bp.classList.add('filled'), 150);
-            setTimeout(() => { bp.classList.add('torn'); SoundManager.playTear(); }, 1150);
-            setTimeout(() => { document.getElementById('bp-continue-btn').style.display = 'flex'; }, 1750);
+            setTimeout(() => {
+                bp.classList.add('filled');
+                bp.classList.add('tear-ready');
+                document.getElementById('bp-tear-hint').style.display = 'flex';
+                setupTicketTearHandlers();
+            }, 150);
+        }
+
+        // --- STRAPPO DEL BIGLIETTO: fatto manualmente dall'utente trascinando
+        // lo stub con il dito (touch) o col mouse, non più automatico. ---
+        let ticketDragState = null;
+        function setupTicketTearHandlers() {
+            const stub = document.getElementById('bp-stub');
+            const bp = document.getElementById('boarding-pass');
+            const TEAR_THRESHOLD = 70; // px di trascinamento necessari per completare lo strappo
+
+            function finishTear() {
+                if (bp.classList.contains('torn')) return;
+                stub.style.transform = '';
+                stub.classList.remove('dragging');
+                bp.classList.add('torn');
+                bp.classList.remove('tear-ready');
+                SoundManager.playTear();
+                ticketDragState = null;
+                document.getElementById('bp-tear-hint').style.display = 'none';
+                setTimeout(() => { document.getElementById('bp-continue-btn').style.display = 'flex'; }, 500);
+            }
+
+            function onPointerDown(e) {
+                if (bp.classList.contains('torn') || !bp.classList.contains('tear-ready')) return;
+                try { stub.setPointerCapture(e.pointerId); } catch(err) {}
+                ticketDragState = { pointerId: e.pointerId, startX: e.clientX, startY: e.clientY };
+                stub.classList.add('dragging');
+                SoundManager.resume();
+            }
+            function onPointerMove(e) {
+                if (!ticketDragState || ticketDragState.pointerId !== e.pointerId) return;
+                const dx = e.clientX - ticketDragState.startX;
+                const dy = e.clientY - ticketDragState.startY;
+                const clampedX = Math.max(0, dx); // solo trascinamento verso destra/basso stacca lo stub
+                stub.style.transform = `translateX(${clampedX * 0.65}px) translateY(${Math.max(-8, Math.min(24, dy * 0.3))}px) rotate(${Math.min(clampedX * 0.15, 10)}deg)`;
+                if (clampedX > TEAR_THRESHOLD) finishTear();
+            }
+            function onPointerUp(e) {
+                if (!ticketDragState || ticketDragState.pointerId !== e.pointerId) return;
+                if (!bp.classList.contains('torn')) stub.style.transform = ''; // lo stub torna a posto se non si è strappato
+                stub.classList.remove('dragging');
+                ticketDragState = null;
+            }
+
+            if (!stub.dataset.tearBound) {
+                stub.dataset.tearBound = '1';
+                stub.addEventListener('pointerdown', onPointerDown);
+                stub.addEventListener('pointermove', onPointerMove);
+                stub.addEventListener('pointerup', onPointerUp);
+                stub.addEventListener('pointercancel', onPointerUp);
+            }
         }
 
         // --- STEP 3: CLOSE TICKET -> ACTUALLY START THE FLIGHT ---
@@ -2300,6 +2732,11 @@
 
         function beginFlightExecution() {
             const t = translations[currentLang];
+            // Ogni volo deve per forza iniziare in modalita' 1x
+            flightSpeedMultiplier = 1;
+            document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+            const speedBtn1x = document.querySelector('.speed-btn[onclick="setSpeed(1)"]');
+            if (speedBtn1x) speedBtn1x.classList.add('active');
             if(planeMarker) map.removeLayer(planeMarker);
             if(routeLine) map.removeLayer(routeLine);
             if(traveledLine) map.removeLayer(traveledLine); // Remove old traveled line
@@ -2318,6 +2755,7 @@
             const arr = airports.find(a => a.id === arrSelect.value);
             const aircraftType = document.getElementById('aircraft-type').value;
             const airlineType = document.getElementById('airline-select').value;
+            currentPlaneColor = (airlineTheme[airlineType] && airlineTheme[airlineType].primary) || '#38bdf8';
 
             if(dep.id === arr.id) return;
 
@@ -2326,19 +2764,16 @@
             SoundManager.playTakeoff();
             
             let baseSpeed = 480, cruiseAltitude = 36000, passengers = 0;
-            if (aircraftType === 'B787') { baseSpeed = 500; cruiseAltitude = 39000; passengers = Math.floor(Math.random() * (296 - 150) + 150); }
-            else if (aircraftType === 'C172') { baseSpeed = 120; cruiseAltitude = 8000; passengers = Math.floor(Math.random() * (3 - 1) + 1); }
-            else if (aircraftType === 'CONC') { baseSpeed = 1100; cruiseAltitude = 55000; passengers = Math.floor(Math.random() * (100 - 40) + 40); }
-            else if (aircraftType === 'B747') { baseSpeed = 510; cruiseAltitude = 38000; passengers = Math.floor(Math.random() * (410 - 250) + 250); }
-            else if (aircraftType === 'A380') { baseSpeed = 505; cruiseAltitude = 39000; passengers = Math.floor(Math.random() * (550 - 300) + 300); }
-            else if (aircraftType === 'B737') { baseSpeed = 450; cruiseAltitude = 35000; passengers = Math.floor(Math.random() * (189 - 100) + 100); }
-            else if (aircraftType === 'A350') { baseSpeed = 500; cruiseAltitude = 40000; passengers = Math.floor(Math.random() * (350 - 200) + 200); }
-            else if (aircraftType === 'E190') { baseSpeed = 440; cruiseAltitude = 33000; passengers = Math.floor(Math.random() * (100 - 50) + 50); }
-            else if (aircraftType === 'G7500') { baseSpeed = 510; cruiseAltitude = 45000; passengers = Math.floor(Math.random() * (15 - 1) + 1); }
-            else if (aircraftType === 'F22') { baseSpeed = 1200; cruiseAltitude = 60000; passengers = 1; }
-            else if (aircraftType === 'AN225') { baseSpeed = 430; cruiseAltitude = 30000; passengers = 6; }
-            else if (aircraftType === 'SPIT') { baseSpeed = 300; cruiseAltitude = 20000; passengers = 1; }
-            else if (aircraftType === 'PC12') { baseSpeed = 270; cruiseAltitude = 25000; passengers = 8; }
+            if (aircraftType === 'A318') { baseSpeed = 440; cruiseAltitude = 35000; passengers = Math.floor(Math.random() * (132 - 100) + 100); }
+            else if (aircraftType === 'A319') { baseSpeed = 447; cruiseAltitude = 35000; passengers = Math.floor(Math.random() * (156 - 124) + 124); }
+            else if (aircraftType === 'A320') { baseSpeed = 450; cruiseAltitude = 36000; passengers = Math.floor(Math.random() * (180 - 150) + 150); }
+            else if (aircraftType === 'A321') { baseSpeed = 455; cruiseAltitude = 36000; passengers = Math.floor(Math.random() * (220 - 185) + 185); }
+            else if (aircraftType === 'A330') { baseSpeed = 470; cruiseAltitude = 39000; passengers = Math.floor(Math.random() * (300 - 250) + 250); }
+            else if (aircraftType === 'A350') { baseSpeed = 500; cruiseAltitude = 40000; passengers = Math.floor(Math.random() * (350 - 250) + 250); }
+            else if (aircraftType === 'B737') { baseSpeed = 450; cruiseAltitude = 35000; passengers = Math.floor(Math.random() * (189 - 130) + 130); }
+            else if (aircraftType === 'B777') { baseSpeed = 490; cruiseAltitude = 38000; passengers = Math.floor(Math.random() * (396 - 300) + 300); }
+            else if (aircraftType === 'B787') { baseSpeed = 500; cruiseAltitude = 39000; passengers = Math.floor(Math.random() * (296 - 250) + 250); }
+
             else { passengers = Math.floor(Math.random() * (180 - 80) + 80); }
 
             const flightNo = pendingFlightNo || (airlineCodes[airlineType] || 'FL') + ' ' + Math.floor(Math.random() * 9000 + 100);
@@ -2379,8 +2814,9 @@
 
             let progress = 0;
             const distanceKM = map.distance([dep.lat, dep.lon], [arr.lat, arr.lon]) / 1000;
+            currentFlightDistanceKm = distanceKM;
             const distanceNM = distanceKM * 0.539957;
-            const totalSteps = Math.max(5000, distanceNM * 15); 
+            const totalSteps = Math.max(4300, distanceNM * 13); 
             let currentFuel = 100;
 
             let curLat = dep.lat; let curLon = dep.lon;
@@ -2388,7 +2824,7 @@
             const dLonInit = destLon - dep.lon;
             const initialBearing = (Math.atan2(dLonInit, dLatInit) * 180 / Math.PI + 360) % 360;
 
-            planeMarker = L.marker([dep.lat, dep.lon], { icon: createPlaneIcon(initialBearing), zIndexOffset: 10000 }).addTo(map);
+            planeMarker = L.marker([dep.lat, dep.lon], { icon: createPlaneIcon(initialBearing, currentPlaneColor), zIndexOffset: 10000 }).addTo(map);
 
             flightInterval = setInterval(() => {
                 if (isPaused) return;
@@ -2428,14 +2864,13 @@
                 const dLon = destLon - curLon;
                 const realTimeBearing = (Math.atan2(dLon, dLat) * 180 / Math.PI + 360) % 360;
                 
-                planeMarker.setIcon(createPlaneIcon(realTimeBearing));
+                planeMarker.setIcon(createPlaneIcon(realTimeBearing, currentPlaneColor));
 
                 if (isFollowingPlane) map.panTo(planeMarker.getLatLng());
 
-                const offset = Math.round(curLon / 15);
-                const utc = new Date();
-                const localHour = (utc.getUTCHours() + offset + 24) % 24;
-                const localMin = utc.getUTCMinutes().toString().padStart(2, '0');
+                const localTotalMin = getGameLocalMinutes(curLon);
+                const localHour = Math.floor(localTotalMin / 60);
+                const localMin = Math.floor(localTotalMin % 60).toString().padStart(2, '0');
                 document.getElementById('top-local-time').innerText = `${localHour}:${localMin}`; 
                 
                 updateDayNightCycle(localHour);
@@ -2519,6 +2954,11 @@
             clearInterval(flightInterval);
             isPaused = false;
             SoundManager.playArrival();
+
+            gameStats.flightsCompleted += 1;
+            gameStats.totalDistanceKm += currentFlightDistanceKm;
+            if (currentFlightDistanceKm > gameStats.longestFlightKm) gameStats.longestFlightKm = currentFlightDistanceKm;
+            saveStats();
             if(departureMarker) { map.removeLayer(departureMarker); departureMarker = null; }
             if(arrivalMarker) { map.removeLayer(arrivalMarker); arrivalMarker = null; }
 
