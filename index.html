@@ -529,6 +529,14 @@
         .news-list li i { color: var(--text-muted); font-size: 1.1rem; }
         .news-list li:hover i { color: white; }
 
+        /* --- MODAL "COME SI GIOCA": versione compatta per evitare lo scroll --- */
+        #howto-modal .modal-content { padding: 1.7rem 1.9rem; max-width: 420px; }
+        #howto-modal .modal-title { font-size: 1.25rem; margin-bottom: 1rem; padding-bottom: 10px; }
+        #howto-modal .news-list li { padding: 9px 12px; margin-bottom: 0.5rem; gap: 12px; font-size: 0.95rem; }
+        #howto-modal .news-list li i { font-size: 0.95rem; width: 18px; text-align: center; }
+        #howto-modal .news-list li b { font-size: 0.85rem; }
+        #howto-modal .news-list li span { font-size: 0.72rem !important; line-height: 1.25; }
+
         /* --- SEAT SELECTION MODAL --- */
         .seat-modal-content { max-width: 440px; }
         .seat-flight-summary {
@@ -1526,6 +1534,10 @@
             if (isNaN(sfxVol)) sfxVol = 1.0;
             let muted = localStorage.getItem('rfx_muted') === 'true';
 
+            // Su mobile il volume generale viene alzato di piu' (altoparlanti piu' deboli).
+            const isMobileAudio = window.innerWidth <= 768 || ('ontouchstart' in window);
+            const MASTER_GAIN = isMobileAudio ? 6.8 : 4.6;
+
             function ensureCtx() {
                 if (ctx) return;
                 ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1541,7 +1553,7 @@
                 limiter.connect(ctx.destination);
 
                 masterGain = ctx.createGain();
-                masterGain.gain.value = muted ? 0 : 4.6;
+                masterGain.gain.value = muted ? 0 : MASTER_GAIN;
                 masterGain.connect(limiter);
 
                 musicGain = ctx.createGain();
@@ -1752,7 +1764,7 @@
             function setSfxVolume(v) { sfxVol = v; if (sfxGain) sfxGain.gain.value = v; localStorage.setItem('rfx_sfxVol', v); }
             function setMuted(m) {
                 muted = m;
-                if (masterGain) masterGain.gain.value = m ? 0 : 4.6;
+                if (masterGain) masterGain.gain.value = m ? 0 : MASTER_GAIN;
                 localStorage.setItem('rfx_muted', m);
             }
             function getState() { return { musicVol, sfxVol, muted }; }
@@ -2701,9 +2713,15 @@
             const bp = document.getElementById('boarding-pass');
             if (bp.classList.contains('torn')) return;
             SoundManager.resume();
-            stub.classList.add('dragging');
-            stub.style.transform = 'translateX(90px) translateY(14px) rotate(10deg)';
-            setTimeout(() => finishTear(stub, bp), 350);
+            // Niente classe "dragging": lasciamo lavorare la transizione CSS dello stub
+            // cosi' il movimento e' morbido e non uno scatto istantaneo.
+            requestAnimationFrame(() => {
+                stub.style.transform = 'translateX(16px) translateY(3px) rotate(2deg)';
+            });
+            setTimeout(() => {
+                stub.style.transform = 'translateX(95px) translateY(16px) rotate(11deg)';
+            }, 280);
+            setTimeout(() => finishTear(stub, bp), 780);
         }
 
         function setupTicketTearHandlers() {
