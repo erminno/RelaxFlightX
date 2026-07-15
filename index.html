@@ -2464,7 +2464,7 @@
             const c = color || currentPlaneColor || '#38bdf8';
             return L.divIcon({
                 className: 'plane-icon-wrapper',
-                html: `<i class="fa-solid fa-plane" style="display:block; font-size: 34px; color: ${c}; transform: rotate(${rotation - 90}deg); filter: saturate(2.2) brightness(1.4) drop-shadow(0 4px 10px rgba(0,0,0,0.8)) drop-shadow(0 0 6px ${c}) drop-shadow(0 0 16px ${c}); text-shadow: 0 0 8px ${c}, 0 0 18px ${c}, 0 0 32px ${c};"></i>`,
+                html: `<i class="fa-solid fa-plane" style="display:block; font-size: 34px; color: ${c}; transform: rotate(${rotation - 90}deg); filter: saturate(1.2) brightness(1.05) drop-shadow(0 4px 8px rgba(0,0,0,0.6)) drop-shadow(0 0 4px ${c}); text-shadow: 0 0 3px ${c}, 0 0 6px ${c};"></i>`,
                 iconSize: [34, 34], iconAnchor: [17, 17]
             });
         };
@@ -2668,30 +2668,48 @@
             setTimeout(() => {
                 bp.classList.add('filled');
                 bp.classList.add('tear-ready');
-                document.getElementById('bp-tear-hint').style.display = 'flex';
-                setupTicketTearHandlers();
+                const isMobileTear = window.innerWidth <= 768 || ('ontouchstart' in window);
+                if (isMobileTear) {
+                    // Su mobile il trascinamento e' scomodo: lo strappo avviene da solo.
+                    document.getElementById('bp-tear-hint').style.display = 'none';
+                    setTimeout(() => { autoTearTicket(); }, 700);
+                } else {
+                    document.getElementById('bp-tear-hint').style.display = 'flex';
+                    setupTicketTearHandlers();
+                }
             }, 150);
         }
 
-        // --- STRAPPO DEL BIGLIETTO: fatto manualmente dall'utente trascinando
-        // lo stub con il dito (touch) o col mouse, non più automatico. ---
+        // --- STRAPPO DEL BIGLIETTO: su desktop l'utente trascina lo stub
+        // (mouse), su mobile avviene automaticamente perche' il gesto di
+        // trascinamento e' scomodo da fare col dito. ---
         let ticketDragState = null;
+        function finishTear(stub, bp) {
+            if (bp.classList.contains('torn')) return;
+            stub.style.transform = '';
+            stub.classList.remove('dragging');
+            bp.classList.add('torn');
+            bp.classList.remove('tear-ready');
+            SoundManager.playTear();
+            ticketDragState = null;
+            document.getElementById('bp-tear-hint').style.display = 'none';
+            setTimeout(() => { document.getElementById('bp-continue-btn').style.display = 'flex'; }, 500);
+        }
+
+        function autoTearTicket() {
+            const stub = document.getElementById('bp-stub');
+            const bp = document.getElementById('boarding-pass');
+            if (bp.classList.contains('torn')) return;
+            SoundManager.resume();
+            stub.classList.add('dragging');
+            stub.style.transform = 'translateX(90px) translateY(14px) rotate(10deg)';
+            setTimeout(() => finishTear(stub, bp), 350);
+        }
+
         function setupTicketTearHandlers() {
             const stub = document.getElementById('bp-stub');
             const bp = document.getElementById('boarding-pass');
             const TEAR_THRESHOLD = 70; // px di trascinamento necessari per completare lo strappo
-
-            function finishTear() {
-                if (bp.classList.contains('torn')) return;
-                stub.style.transform = '';
-                stub.classList.remove('dragging');
-                bp.classList.add('torn');
-                bp.classList.remove('tear-ready');
-                SoundManager.playTear();
-                ticketDragState = null;
-                document.getElementById('bp-tear-hint').style.display = 'none';
-                setTimeout(() => { document.getElementById('bp-continue-btn').style.display = 'flex'; }, 500);
-            }
 
             function onPointerDown(e) {
                 if (bp.classList.contains('torn') || !bp.classList.contains('tear-ready')) return;
@@ -2706,7 +2724,7 @@
                 const dy = e.clientY - ticketDragState.startY;
                 const clampedX = Math.max(0, dx); // solo trascinamento verso destra/basso stacca lo stub
                 stub.style.transform = `translateX(${clampedX * 0.65}px) translateY(${Math.max(-8, Math.min(24, dy * 0.3))}px) rotate(${Math.min(clampedX * 0.15, 10)}deg)`;
-                if (clampedX > TEAR_THRESHOLD) finishTear();
+                if (clampedX > TEAR_THRESHOLD) finishTear(stub, bp);
             }
             function onPointerUp(e) {
                 if (!ticketDragState || ticketDragState.pointerId !== e.pointerId) return;
