@@ -1099,7 +1099,7 @@
                 </div>
             </div>
             <div id="bp-tear-hint" style="margin-top:1.4rem; color: var(--text-muted); font-size:0.85rem; display:none; align-items:center; justify-content:center; gap:8px;">
-                <i class="fa-solid fa-hand-pointer" style="color:var(--primary);"></i> <span data-translate="bp_tear_hint">Trascina lo stub per strappare il biglietto</span>
+                <i class="fa-solid fa-hand-pointer" style="color:var(--primary);"></i> <span id="bp-tear-hint-text" data-translate="bp_tear_hint">Trascina lo stub per strappare il biglietto</span>
             </div>
             <button class="btn btn-primary" id="bp-continue-btn" onclick="closeBoardingPass()" style="display:none;">
                 <i class="fa-solid fa-paper-plane"></i> <span data-translate="bp_continue">Decolla!</span>
@@ -1318,7 +1318,7 @@
                 stats_reset_confirm_title: "Confermi il reset?",
                 stats_reset_confirm_msg: "Questa azione cancellerà definitivamente tutte le statistiche di gioco. L'operazione non può essere annullata.",
                 stats_reset_confirm_btn: "Conferma", stats_reset_cancel: "Annulla",
-                stats_fab: "Statistiche", bp_tear_hint: "Trascina lo stub per strappare il biglietto",
+                stats_fab: "Statistiche", bp_tear_hint: "Trascina lo stub per strappare il biglietto", bp_tear_hint_tap: "Tocca lo stub per strappare il biglietto",
                 howto_btn: "Come si gioca?", howto_title: "Come si gioca?",
                 howto_step1_title: "1. Scegli la rotta", howto_step1_desc: "Seleziona aeroporto di partenza e destinazione dal pannello laterale.",
                 howto_step2_title: "2. Personalizza il volo", howto_step2_desc: "Scegli compagnia aerea e aeromobile, poi premi Decolla.",
@@ -1369,7 +1369,7 @@
                 stats_reset_confirm_title: "Confirm reset?",
                 stats_reset_confirm_msg: "This action will permanently delete all game statistics. This cannot be undone.",
                 stats_reset_confirm_btn: "Confirm", stats_reset_cancel: "Cancel",
-                stats_fab: "Statistics", bp_tear_hint: "Drag the stub to tear the ticket",
+                stats_fab: "Statistics", bp_tear_hint: "Drag the stub to tear the ticket", bp_tear_hint_tap: "Tap the stub to tear the ticket",
                 howto_btn: "How to play?", howto_title: "How to play?",
                 howto_step1_title: "1. Choose your route", howto_step1_desc: "Select departure and destination airport from the side panel.",
                 howto_step2_title: "2. Customize your flight", howto_step2_desc: "Choose airline and aircraft, then press Take Off.",
@@ -1436,6 +1436,7 @@
                 const key = el.getAttribute('data-translate-placeholder');
                 if (t[key]) el.placeholder = t[key];
             });
+            updateTearHintText();
             if (document.getElementById('hide-ui-modal') && document.getElementById('hide-ui-modal').classList.contains('open')) {
                 buildHideUiList();
             }
@@ -2706,13 +2707,23 @@
                 bp.classList.add('filled');
                 bp.classList.add('tear-ready');
                 document.getElementById('bp-tear-hint').style.display = 'flex';
+                updateTearHintText();
                 setupTicketTearHandlers();
             }, 150);
         }
 
-        // --- STRAPPO DEL BIGLIETTO: l'utente trascina lo stub con il dito
-        // (o il mouse). Su mobile lo stub sta sotto la carta, quindi si stacca
-        // trascinando verso il basso; su desktop sta a destra, quindi verso destra. ---
+        // Sceglie il testo giusto per il suggerimento: "tocca" su mobile, "trascina" su desktop.
+        function updateTearHintText() {
+            const hintEl = document.getElementById('bp-tear-hint-text');
+            if (!hintEl) return;
+            const isMobileTear = window.innerWidth <= 768 || ('ontouchstart' in window);
+            const t = translations[currentLang];
+            hintEl.innerText = isMobileTear ? t.bp_tear_hint_tap : t.bp_tear_hint;
+        }
+
+        // --- STRAPPO DEL BIGLIETTO: su desktop l'utente trascina lo stub verso
+        // destra col mouse; su mobile invece basta un tap sullo stub, che si
+        // stacca da solo con un'animazione fluida (niente trascinamento). ---
         let ticketDragState = null;
         function finishTear(stub, bp) {
             if (bp.classList.contains('torn')) return;
@@ -2729,11 +2740,39 @@
         function setupTicketTearHandlers() {
             const stub = document.getElementById('bp-stub');
             const bp = document.getElementById('boarding-pass');
-            const TEAR_THRESHOLD = 70; // px di trascinamento necessari per completare lo strappo
+            const TEAR_THRESHOLD = 70; // px di trascinamento necessari per completare lo strappo (solo desktop)
 
             function isMobileTear() { return window.innerWidth <= 768 || ('ontouchstart' in window); }
 
+            // Animazione di stacco riprodotta al tap su mobile: lo stub si stacca
+            // verso il basso da solo, con un movimento morbido in due fasi.
+            function playTapTearAnimation() {
+                stub.style.transition = 'none';
+                stub.style.transform = 'translateY(0px) translateX(0px) rotate(0deg)';
+                void stub.offsetHeight; // forza il reflow: garantisce un punto di partenza fermo
+
+                stub.style.transition = 'transform 0.35s cubic-bezier(.33,.1,.2,1)';
+                stub.style.transform = 'translateY(14px) translateX(3px) rotate(2deg)';
+
+                setTimeout(() => {
+                    stub.style.transition = 'transform 0.5s cubic-bezier(.4,0,.2,1)';
+                    stub.style.transform = 'translateY(96px) translateX(6px) rotate(11deg)';
+                    setTimeout(() => {
+                        stub.style.transition = '';
+                        finishTear(stub, bp);
+                    }, 460);
+                }, 300);
+            }
+
+            function onTap() {
+                if (!isMobileTear()) return;
+                if (bp.classList.contains('torn') || !bp.classList.contains('tear-ready')) return;
+                SoundManager.resume();
+                playTapTearAnimation();
+            }
+
             function onPointerDown(e) {
+                if (isMobileTear()) return; // su mobile si tocca, non si trascina
                 if (bp.classList.contains('torn') || !bp.classList.contains('tear-ready')) return;
                 try { stub.setPointerCapture(e.pointerId); } catch(err) {}
                 ticketDragState = { pointerId: e.pointerId, startX: e.clientX, startY: e.clientY };
@@ -2741,21 +2780,16 @@
                 SoundManager.resume();
             }
             function onPointerMove(e) {
+                if (isMobileTear()) return;
                 if (!ticketDragState || ticketDragState.pointerId !== e.pointerId) return;
                 const dx = e.clientX - ticketDragState.startX;
                 const dy = e.clientY - ticketDragState.startY;
-                if (isMobileTear()) {
-                    // Su mobile lo stub e' sotto la carta: si stacca trascinando verso il basso.
-                    const clampedY = Math.max(0, dy);
-                    stub.style.transform = `translateY(${clampedY * 0.65}px) translateX(${Math.max(-8, Math.min(24, dx * 0.3))}px) rotate(${Math.min(clampedY * 0.15, 10)}deg)`;
-                    if (clampedY > TEAR_THRESHOLD) finishTear(stub, bp);
-                } else {
-                    const clampedX = Math.max(0, dx); // solo trascinamento verso destra stacca lo stub
-                    stub.style.transform = `translateX(${clampedX * 0.65}px) translateY(${Math.max(-8, Math.min(24, dy * 0.3))}px) rotate(${Math.min(clampedX * 0.15, 10)}deg)`;
-                    if (clampedX > TEAR_THRESHOLD) finishTear(stub, bp);
-                }
+                const clampedX = Math.max(0, dx); // solo trascinamento verso destra stacca lo stub
+                stub.style.transform = `translateX(${clampedX * 0.65}px) translateY(${Math.max(-8, Math.min(24, dy * 0.3))}px) rotate(${Math.min(clampedX * 0.15, 10)}deg)`;
+                if (clampedX > TEAR_THRESHOLD) finishTear(stub, bp);
             }
             function onPointerUp(e) {
+                if (isMobileTear()) return;
                 if (!ticketDragState || ticketDragState.pointerId !== e.pointerId) return;
                 if (!bp.classList.contains('torn')) stub.style.transform = ''; // lo stub torna a posto se non si è strappato
                 stub.classList.remove('dragging');
@@ -2768,6 +2802,7 @@
                 stub.addEventListener('pointermove', onPointerMove);
                 stub.addEventListener('pointerup', onPointerUp);
                 stub.addEventListener('pointercancel', onPointerUp);
+                stub.addEventListener('click', onTap);
             }
         }
 
