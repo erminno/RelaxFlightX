@@ -219,7 +219,7 @@
         }
         #show-ui-fab.visible { display: flex; }
 
-        @media (max-width: 768px) {
+        @media (max-width: 768px), (max-height: 500px) and (orientation: landscape) {
             .mobile-only-row { display: block; }
         }
 
@@ -701,7 +701,7 @@
             box-shadow: -6px 10px 24px rgba(0,0,0,0.55);
         }
 
-        #bp-continue-btn { margin: 1.6rem auto 0 auto; max-width: 280px; }
+        #bp-continue-btn { margin: 2.4rem auto 0 auto; max-width: 280px; }
 
         @media (max-width: 480px) {
             .boarding-pass { flex-direction: column; }
@@ -722,7 +722,10 @@
         }
 
         /* --- MOBILE ADJUSTMENTS (ORDINE E PULIZIA) --- */
-        @media (max-width: 768px) {
+        /* Si applica sia al portrait (larghezza ridotta) sia al landscape su smartphone
+           (altezza ridotta), cosi' il gioco resta comodamente giocabile in entrambi gli
+           orientamenti su telefono, senza attivarsi su tablet/desktop in orizzontale. */
+        @media (max-width: 768px), (max-height: 500px) and (orientation: landscape) {
             /* 1. Sidebar come Bottom Sheet (Fissa in basso, comprimibile) */
             .sidebar { 
                 top: auto; bottom: 0; left: 0; transform: none; width: 100%; 
@@ -744,8 +747,12 @@
             select { padding: 0.7rem; }
 
             /* 2. Top Right Panel: MOLTO PIÙ PICCOLO SU MOBILE */
+            /* La barra velocità esce dal flusso del pannello ed e' allineata alla stessa
+               altezza dei pulsanti impostazioni/statistiche, ma sul lato opposto (destra).
+               Il resto del pannello (ora local time, dati volo, segui aereo) si alza di
+               conseguenza per occupare lo spazio lasciato libero. */
             .top-panel-container { 
-                top: 50px; right: 8px; width: auto; max-width: 170px; /* Ridotto drasticamente */
+                top: 66px; right: 8px; width: auto; max-width: 170px; /* Ridotto drasticamente */
                 align-items: flex-end; gap: 6px;
             }
             
@@ -767,7 +774,11 @@
             .env-label, .info-panel-top .t-label { font-size: 0.55rem; }
             .env-value, .info-panel-top .t-value { font-size: 0.8rem; }
             
-            .speed-controls { padding: 3px; border-radius: 30px; }
+            .speed-controls {
+                position: fixed; top: 26px; right: 8px; left: auto;
+                width: auto; max-width: none; z-index: 1000;
+                padding: 3px; border-radius: 30px;
+            }
             .speed-btn { padding: 4px 8px; font-size: 0.65rem; }
 
             .follow-btn { padding: 8px 12px; font-size: 0.75rem; border-radius: 12px; }
@@ -794,13 +805,10 @@
             .news-btn-wrapper { top: 66px; left: 10px; right: auto; bottom: auto; }
             .news-btn { padding: 4px 10px; font-size: 0.75rem; }
 
-            /* 6b. Fullscreen: staccato dal settings-panel e posizionato sotto il pulsante notizie */
-            #fullscreen-btn {
-                position: fixed;
-                top: 108px;
-                left: 10px;
-                z-index: 1000;
-            }
+            /* 6b. Fullscreen: ora e' un'icona come impostazioni/statistiche e resta nella
+               stessa riga, posizionata in mezzo tra i due pulsanti. */
+            #fullscreen-btn { order: 2; }
+            #ingame-stats-btn { order: 3; }
             
             .menu-title { font-size: 2.5rem; }
             .menu-icon { font-size: 3rem; margin-bottom: 10px; }
@@ -813,6 +821,22 @@
             .menu-btn-secondary { width: 100%; max-width: 240px; justify-content: center; }
             .icon-btn { width: 36px; height: 36px; font-size: 0.85rem; }
             .modal-content { padding: 1.6rem; }
+        }
+
+        /* --- SMARTPHONE IN LANDSCAPE: la sidebar torna un pannello flottante
+           (come su desktop) invece di un bottom-sheet, perché su schermi bassi
+           un foglio che sale dal basso occuperebbe troppa altezza utile. --- */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .sidebar {
+                top: 12px; bottom: auto; left: 12px; transform: none;
+                width: min(300px, 42vw); max-height: calc(100vh - 24px);
+                border-radius: var(--radius-lg); border: 1px solid rgba(255,255,255,0.1);
+            }
+            .sidebar.minimized { transform: none; }
+            .sidebar-handle-container { display: none; }
+            .content { padding: 0.8rem; gap: 0.5rem; }
+
+            .center-controls, .center-controls.minimized { bottom: 14px; }
         }
     </style>
 </head>
@@ -1115,8 +1139,8 @@
             <button class="icon-btn" id="ingame-stats-btn" onclick="openStatsModal()" title="Statistiche">
                 <i class="fa-solid fa-chart-simple"></i>
             </button>
-            <button class="lang-btn" id="fullscreen-btn" onclick="toggleFullscreen()" title="Schermo Intero">
-                <i class="fa-solid fa-expand" id="fullscreen-icon"></i> <span id="fullscreen-text">Schermo Intero</span>
+            <button class="icon-btn" id="fullscreen-btn" onclick="toggleFullscreen()" title="Schermo Intero">
+                <i class="fa-solid fa-expand" id="fullscreen-icon"></i>
             </button>
         </div>
         <div class="credits">Game designed by Minno</div>
@@ -1280,6 +1304,13 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <script>
+        // --- Rileva il layout "mobile": portrait stretto oppure smartphone in landscape
+        // (schermo basso). Usata ovunque il layout compatto debba attivarsi anche in
+        // orizzontale su telefono, senza scattare su tablet/desktop in landscape. ---
+        function isMobileLayout() {
+            return window.innerWidth <= 768 || (window.innerHeight <= 500 && window.innerWidth > window.innerHeight);
+        }
+
         // --- TRANSLATION SYSTEM ---
         let currentLang = 'it';
         const translations = {
@@ -1809,7 +1840,7 @@
         }
         function updateShowUiFab() {
             const fab = document.getElementById('show-ui-fab');
-            const isMobile = window.innerWidth <= 768;
+            const isMobile = isMobileLayout();
             fab.classList.toggle('visible', isMobile && hiddenUiIds.length > 0);
         }
         function toggleUiItem(id, hide) {
@@ -1963,7 +1994,7 @@
             });
             
             document.querySelector('.sidebar .header').addEventListener('click', () => {
-                if(window.innerWidth <= 768) {
+                if(isMobileLayout()) {
                     sidebar.classList.toggle('minimized');
                     centerControls.classList.toggle('minimized');
                 }
@@ -2314,8 +2345,8 @@
             const eta = document.getElementById('eta-display');
             const followBtn = document.getElementById('follow-btn');
             if (!eta || !followBtn) return;
-            const isMobileLayout = window.innerWidth <= 768;
-            if (!isMobileLayout) {
+            const mobileLayout = isMobileLayout();
+            if (!mobileLayout) {
                 eta.style.position = '';
                 eta.style.top = '';
                 eta.style.left = '';
