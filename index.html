@@ -268,15 +268,17 @@
         }
 
         .speed-controls {
-            background: rgba(15, 23, 42, 0.75); padding: 8px; border-radius: 50px;
-            border: 1px solid rgba(255,255,255,0.1); display: flex; gap: 5px;
+            background: rgba(15, 23, 42, 0.75); padding: 0 6px; border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 5px;
             backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0,0,0,0.3);
             width: 100%; justify-content: space-around;
+            height: 42px; box-sizing: border-box; /* stessa altezza dei pulsanti tondi .icon-btn */
         }
 
         .speed-btn {
             background: transparent; border: none; color: var(--text-muted);
-            padding: 8px 16px; border-radius: 40px; cursor: pointer; font-weight: 700;
+            padding: 0 16px; height: 100%; display: flex; align-items: center; justify-content: center;
+            border-radius: 40px; cursor: pointer; font-weight: 700;
             font-size: 0.85rem; transition: all 0.3s ease; flex-grow: 1; text-align: center;
         }
         .speed-btn:hover { background: rgba(255,255,255,0.1); color: white; }
@@ -643,7 +645,13 @@
             background: linear-gradient(135deg, #f8fafc, #e2e8f0);
             border-top: 5px solid var(--bp-primary);
             border-right: 2px dashed rgba(15,23,42,0.25);
-            transition: clip-path 0.55s cubic-bezier(.36,.66,.32,1);
+            /* Clip-path di partenza con lo STESSO numero di vertici della versione
+               "strappata" qui sotto (bordo dritto invece che frastagliato): serve solo
+               a permettere al browser di animare in modo fluido da un bordo dritto a
+               uno frastagliato. Senza questo, il passaggio a clip-path:none->polygon()
+               non è interpolabile e il bordo apparirebbe di scatto anziché "strapparsi". */
+            clip-path: polygon(0% 0%, 100% 0%, 100% 7.14%, 100% 14.29%, 100% 21.43%, 100% 28.57%, 100% 35.71%, 100% 42.86%, 100% 50%, 100% 57.14%, 100% 64.29%, 100% 71.43%, 100% 78.57%, 100% 85.71%, 100% 92.86%, 100% 100%, 0% 100%);
+            transition: clip-path 0.6s cubic-bezier(.36,.66,.32,1), transform 0.6s cubic-bezier(.36,.66,.32,1);
         }
         .bp-header {
             display: flex; align-items: center; gap: 10px; color: var(--bp-primary); font-weight: 800;
@@ -664,7 +672,10 @@
             border-radius: 0 20px 20px 0;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             gap: 12px; padding: 1rem 0.5rem; position: relative;
-            transition: transform 0.6s cubic-bezier(.36,.66,.32,1), box-shadow 0.6s ease;
+            /* Bordo di partenza dritto (stesso numero di vertici della versione strappata)
+               cosi' anche lo stub puo' animare il bordo frastagliato invece di farlo comparire di scatto. */
+            clip-path: polygon(100% 0%, 0% 0%, 0% 7.14%, 0% 14.29%, 0% 21.43%, 0% 28.57%, 0% 35.71%, 0% 42.86%, 0% 50%, 0% 57.14%, 0% 64.29%, 0% 71.43%, 0% 78.57%, 0% 85.71%, 0% 92.86%, 0% 100%, 100% 100%);
+            transition: transform 0.6s cubic-bezier(.36,.66,.32,1), box-shadow 0.6s ease, clip-path 0.6s cubic-bezier(.36,.66,.32,1);
             will-change: transform;
         }
         .bp-stub.tear-ready { cursor: grab; touch-action: none; }
@@ -705,8 +716,16 @@
 
         @media (max-width: 480px) {
             .boarding-pass { flex-direction: column; }
-            .bp-main { border-radius: 20px 20px 0 0; border-right: none; border-bottom: 2px dashed rgba(15,23,42,0.25); }
-            .bp-stub { flex-direction: row; width: 100%; border-radius: 0 0 20px 20px; }
+            .bp-main {
+                border-radius: 20px 20px 0 0; border-right: none; border-bottom: 2px dashed rgba(15,23,42,0.25);
+                /* Bordo di partenza dritto (stesso numero di vertici della versione .torn qui sotto,
+                   tagliato in basso invece che a destra) per un'animazione di strappo fluida su mobile. */
+                clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 92.86% 100%, 85.71% 100%, 78.57% 100%, 71.43% 100%, 64.29% 100%, 57.14% 100%, 50% 100%, 42.86% 100%, 35.71% 100%, 28.57% 100%, 21.43% 100%, 14.29% 100%, 7.14% 100%, 0% 100%, 0% 100%);
+            }
+            .bp-stub {
+                flex-direction: row; width: 100%; border-radius: 0 0 20px 20px;
+                clip-path: polygon(0% 0%, 7.14% 0%, 14.29% 0%, 21.43% 0%, 28.57% 0%, 35.71% 0%, 42.86% 0%, 50% 0%, 57.14% 0%, 64.29% 0%, 71.43% 0%, 78.57% 0%, 85.71% 0%, 92.86% 0%, 100% 0%, 100% 100%, 0% 100%);
+            }
             .bp-barcode { width: 84px; height: 24px; background: repeating-linear-gradient(0deg, #f8fafc 0 2px, transparent 2px 4px); }
             .bp-stub::before, .bp-stub::after { left: 50%; top: -8px; transform: translateX(-50%); }
             .bp-stub::after { bottom: -8px; top: auto; }
@@ -777,9 +796,10 @@
             .speed-controls {
                 position: fixed; top: 26px; right: 8px; left: auto;
                 width: auto; max-width: none; z-index: 1000;
-                padding: 3px; border-radius: 30px;
+                padding: 0 4px; border-radius: 30px;
+                height: 36px; box-sizing: border-box; align-items: center;
             }
-            .speed-btn { padding: 4px 8px; font-size: 0.65rem; }
+            .speed-btn { padding: 0 10px; height: 100%; font-size: 0.65rem; }
 
             .follow-btn { padding: 8px 12px; font-size: 0.75rem; border-radius: 12px; }
 
@@ -838,10 +858,44 @@
 
             .center-controls, .center-controls.minimized { bottom: 14px; }
         }
+
+        /* --- BLOCCO ROTAZIONE (SOLO SMARTPHONE): il gioco è pensato solo per l'uso
+           verticale su telefono, quindi in orizzontale mostriamo un invito a ruotare
+           invece dell'interfaccia di gioco. "hover:none / pointer:coarse" esclude
+           desktop/laptop (che hanno mouse) e limita l'effetto ai veri touchscreen. --- */
+        #rotate-lock-overlay {
+            display: none; position: fixed; inset: 0; z-index: 999999;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 85%);
+            align-items: center; justify-content: center; text-align: center; padding: 2rem;
+        }
+        .rotate-lock-icon {
+            font-size: 3.6rem; color: var(--primary); display: block; margin: 0 auto 1.3rem auto;
+            animation: rotate-lock-spin 1.8s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(56,189,248,0.5));
+        }
+        @keyframes rotate-lock-spin {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(-90deg); }
+        }
+        .rotate-lock-text {
+            font-size: 1.05rem; font-weight: 600; color: var(--text-muted);
+            max-width: 300px; margin: 0 auto; line-height: 1.5;
+        }
+        @media (max-height: 500px) and (orientation: landscape) and (hover: none) and (pointer: coarse) {
+            #rotate-lock-overlay { display: flex; }
+        }
     </style>
 </head>
 <body>
-    
+
+    <!-- BLOCCO ROTAZIONE: visibile solo su smartphone (touch) in orizzontale -->
+    <div id="rotate-lock-overlay">
+        <div>
+            <i class="fa-solid fa-mobile-screen-button rotate-lock-icon"></i>
+            <p class="rotate-lock-text" data-translate="rotate_lock_text">Ruota il telefono in verticale per continuare a giocare</p>
+        </div>
+    </div>
+
     <!-- MENU PRINCIPALE -->
     <div id="main-menu">
         <div id="menu-bg-map"></div>
@@ -1350,6 +1404,7 @@
                 stats_reset_confirm_msg: "Questa azione cancellerà definitivamente tutte le statistiche di gioco. L'operazione non può essere annullata.",
                 stats_reset_confirm_btn: "Conferma", stats_reset_cancel: "Annulla",
                 stats_fab: "Statistiche", bp_tear_hint: "Trascina lo stub per strappare il biglietto", bp_tear_hint_tap: "Tocca lo stub per strappare il biglietto",
+                rotate_lock_text: "Ruota il telefono in verticale per continuare a giocare",
                 howto_btn: "Come si gioca?", howto_title: "Come si gioca?",
                 howto_step1_title: "1. Scegli la rotta", howto_step1_desc: "Seleziona aeroporto di partenza e destinazione dal pannello laterale.",
                 howto_step2_title: "2. Personalizza il volo", howto_step2_desc: "Scegli compagnia aerea e aeromobile, poi premi Decolla.",
@@ -1401,6 +1456,7 @@
                 stats_reset_confirm_msg: "This action will permanently delete all game statistics. This cannot be undone.",
                 stats_reset_confirm_btn: "Confirm", stats_reset_cancel: "Cancel",
                 stats_fab: "Statistics", bp_tear_hint: "Drag the stub to tear the ticket", bp_tear_hint_tap: "Tap the stub to tear the ticket",
+                rotate_lock_text: "Rotate your phone to portrait to keep playing",
                 howto_btn: "How to play?", howto_title: "How to play?",
                 howto_step1_title: "1. Choose your route", howto_step1_desc: "Select departure and destination airport from the side panel.",
                 howto_step2_title: "2. Customize your flight", howto_step2_desc: "Choose airline and aircraft, then press Take Off.",
@@ -2505,6 +2561,31 @@
             }
         }
 
+        // --- BLOCCO ROTAZIONE: mette in pausa il volo mentre l'overlay "ruota il
+        // telefono" è visibile (solo smartphone in orizzontale), cosi' non si perde
+        // tempo di volo mentre l'utente non può vedere/interagire con la schermata.
+        // Riprende automaticamente da solo quando si torna in verticale.
+        (function setupRotateLockAutoPause() {
+            const rotateLockQuery = window.matchMedia('(max-height: 500px) and (orientation: landscape) and (hover: none) and (pointer: coarse)');
+            let autoPausedByRotateLock = false;
+            function handleRotateLockChange(e) {
+                if (e.matches) {
+                    if (flightInterval && !isPaused) {
+                        togglePause();
+                        autoPausedByRotateLock = true;
+                    }
+                } else {
+                    if (autoPausedByRotateLock && flightInterval && isPaused) {
+                        togglePause();
+                    }
+                    autoPausedByRotateLock = false;
+                }
+            }
+            if (rotateLockQuery.addEventListener) rotateLockQuery.addEventListener('change', handleRotateLockChange);
+            else if (rotateLockQuery.addListener) rotateLockQuery.addListener(handleRotateLockChange);
+            handleRotateLockChange(rotateLockQuery);
+        })();
+
         function toggleMapType() {
             const t = translations[currentLang];
             const btn = document.getElementById('map-btn');
@@ -2760,12 +2841,17 @@
             if (bp.classList.contains('torn')) return;
             stub.style.transform = '';
             stub.classList.remove('dragging');
+            // Forza un reflow prima di applicare .torn: garantisce che il browser registri
+            // la posizione attuale come punto di partenza della transizione, cosi' lo
+            // strappo (bordo frastagliato + spostamento dello stub) risulta sempre fluido
+            // invece che di scatto.
+            void bp.offsetHeight;
             bp.classList.add('torn');
             bp.classList.remove('tear-ready');
             SoundManager.playTear();
             ticketDragState = null;
             document.getElementById('bp-tear-hint').style.display = 'none';
-            setTimeout(() => { document.getElementById('bp-continue-btn').style.display = 'flex'; }, 500);
+            setTimeout(() => { document.getElementById('bp-continue-btn').style.display = 'flex'; }, 600);
         }
 
         function setupTicketTearHandlers() {
